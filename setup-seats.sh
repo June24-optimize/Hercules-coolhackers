@@ -27,6 +27,10 @@ create() {
   local mandate="$FACTORY_DIR/mandates/$name.md"
   local model
   model=$(sed -n 's/^Model: //p' "$mandate" | head -1)   # the mandate is the source of truth
+  # band rejects --instructions-file together with --dry-run, so a dry run probes the
+  # runtime only; the real run links the mandate.
+  local instructions=(--instructions-file "$mandate")
+  [ -n "$DRY" ] && instructions=()
   echo "== $name ($model)"
   "$BAND" agent create \
     --name "$name" \
@@ -37,7 +41,7 @@ create() {
     --runtime-model "$model" \
     --claude-permission-mode "$PERMISSION_MODE" \
     --claude-context-mode local_config \
-    --instructions-file "$mandate" \
+    ${instructions[@]+"${instructions[@]}"} \
     $DRY
 }
 
