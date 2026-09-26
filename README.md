@@ -1,11 +1,18 @@
-# CoolHackers · Dark Factory (tablekeeper)
+# CoolHackers · Pocketful Delivery Line
 
-Planning branch for our WeAreDevelopers × BAND "Dark Factory" hackathon entry.
+Our factory for the WeAreDevelopers × BAND "Dark Factory" hackathon, **pocketful** track.
+Design by Srilekha ([deck](docs/pocketful-delivery-line.pdf)), with the changes in [PLAN.md §9](PLAN.md#9-changes-from-the-original-deck-and-why).
 
-| File | What it is |
+| Path | What it is |
 |---|---|
-| [PLAN.md](PLAN.md) | The complete plan: scoring, gates, factory design (with diagrams), schedule, submission checklist |
-| [mandates/](mandates/) | Generic standing instructions for the four seats: lead, coder-a, coder-b, reviewer |
-| [dispatch-tablekeeper.md](dispatch-tablekeeper.md) | The single task message for the judged run (all track-specific detail lives here) |
+| [PLAN.md](PLAN.md) | The complete plan: scoring, gates, seats, flow diagrams, release pipeline, service, schedule, checklist |
+| [mandates/](mandates/) | Generic standing instructions for the ten seats (generated; do not edit by hand) |
+| [tools/build_mandates.py](tools/build_mandates.py) | Source of the mandates: shared rules + one role section per seat |
+| [tools/scan_mandates.sh](tools/scan_mandates.sh) | The harness's mandate rules (Harness/Model lines, track vocabulary); run after every edit |
+| [setup-seats.sh](setup-seats.sh) | Creates the nine model seats in Band, live-linked to their mandates |
+| [claude-settings.json](claude-settings.json) | Pre-allowed commands for the seats (git push denied) |
+| [dispatch-pocketful.md](dispatch-pocketful.md) | The single task message for the judged run (all track detail lives here) |
+| [dispatch-toy.md](dispatch-toy.md) | The toy rehearsal task |
+| [docs/setup-notes.md](docs/setup-notes.md) | Step-by-step setup and submission notes |
 
-Spec package: https://github.com/band-ai/dark-factory-wearedevs
+Spec package: https://github.com/band-ai/dark-factory-wearedevs · Earlier tablekeeper plan: branch `tablekeeper-plan`.

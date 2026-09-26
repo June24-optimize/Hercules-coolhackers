@@ -1,4 +1,4 @@
-# Dispatch task: toy rehearsal (paste as one message to @lead)
+# Dispatch task: toy rehearsal (paste as one message to @coordinator)
 
 Unscored practice. Prepare the repo first:
 
@@ -11,7 +11,7 @@ Unscored practice. Prepare the repo first:
 
 ---
 
-@lead You are the lead seat. Build all four stages of the toy track, one after the other,
+@coordinator Build all four stages of the toy track, one after the other,
 following your mandate. Do not ask me anything; I will not reply.
 
 Specification package: /Users/wanyubian/hackathon/dark-factory-wearedevs
@@ -26,6 +26,8 @@ Stage specifications (read each in full and paste it in full into every handoff)
 
 Stage N lives in stage-N/ with a Dockerfile, RUN.md and source; stage-2/ starts as a copy of
 the verified stage-1/, and so on (delete any .git in a copy). Documents go in specs/stage-N/.
+
+Release tooling: none
 
 Checks (the reviewer runs these):
 

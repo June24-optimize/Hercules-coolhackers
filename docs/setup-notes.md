@@ -1,0 +1,70 @@
+# Setup notes (from Srilekha, with fixes)
+
+The seats work on folders on the machine that runs them: you point them at local paths, and
+you push to GitHub at the end. You don't paste the spec yourself either. The dispatch tells the
+coordinator where the spec files are, and the coordinator pastes the full spec into each handoff.
+
+## The two folders
+
+| Folder | Example path | Seats… |
+|---|---|---|
+| Kickoff repo (specs, harness) | `~/hackathon/dark-factory-wearedevs` | read it only |
+| Result repo (what you submit) | `~/hackathon/band-work/result` | write and commit here |
+
+Use absolute paths (`/Users/<you>/...`) everywhere you give a path to a seat.
+
+## Step by step
+
+1. Create the result repo, empty and local:
+   ```sh
+   mkdir -p ~/hackathon/band-work/result/stage-1 ~/hackathon/band-work/checks
+   git -C ~/hackathon/band-work/result init -b main
+   ```
+2. Set up the harness so the reviewer seat can run checks (Python 3.12+ and a running Docker):
+   ```sh
+   cd ~/hackathon/dark-factory-wearedevs && python3.12 -m venv .venv \
+     && .venv/bin/pip install -r harness/requirements.txt \
+     && .venv/bin/python -m playwright install chromium
+   ```
+3. Create the seats: `./setup-seats.sh` (or in Band Desktop, **New local agent → Claude Code**
+   once per seat, named exactly like its mandate file).
+   - Working directory: an absolute path. With a relative path, a seat can create a repo only it can see.
+   - Instructions: the seat's mandate file (the script links it live).
+   - Permissions: pre-allow git, docker and the harness command (`claude-settings.json`), so no
+     seat stalls on a permission prompt during the judged run.
+   - Leave Docker Sandbox off for the seats that run containers (reviewer, release-manager),
+     so staging is visible to everyone.
+4. Each seat commits under its own name (the mandates say so), so the history shows who did what.
+5. Put all the seats in one room, then send one test message each way between two seats. That
+   also exercises gate 2.
+
+## The dispatch: the only human input
+
+- **One dispatch for all four stages** (recommended for the final run): one message, then nothing
+  until the end, so there's no risk of accidental steering.
+- **One dispatch per stage:** four messages and nothing in between. A "looks good, continue"
+  counts as steering, and dispatching a stage twice counts as a rerun.
+
+The dispatch is `dispatch-pocketful.md`, addressed to `@coordinator`.
+
+## Getting it onto GitHub (after the run)
+
+1. Download the room from the Band console (**Download → Download full session**). Save it
+   unchanged as `result/room.json`, and read it for secrets.
+2. Write `README.md` and `FACTORY.md` yourself; everything under `stage-N/` must come from the band.
+3. Run the offline check:
+   ```sh
+   cd ~/hackathon/dark-factory-wearedevs && .venv/bin/python -m harness check ../band-work/result --track pocketful
+   ```
+4. Create the public repo and push the history as the seats made it (no squash, amend or rebase):
+   ```sh
+   cd ~/hackathon/band-work/result && gh repo create pocketful-delivery-line --public --source . --push
+   ```
+5. Clone that repo into a fresh folder and run `harness check` again. This catches forgotten files
+   and stage folders that are secretly their own git repos.
+
+You push, not the seats (the permission list denies `git push`): anything a seat touches ends up
+in `room.json`, which is public.
+
+For practice runs, use a separate folder such as `band-work/toy-result` and a separate room, so
+the final run starts clean.

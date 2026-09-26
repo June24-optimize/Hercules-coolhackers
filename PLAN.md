@@ -1,8 +1,10 @@
-# CoolHackers · Dark Factory · tablekeeper: complete plan
+# CoolHackers · Pocketful Delivery Line · complete plan
+
+Design: **Srilekha's "Pocketful Delivery Line"** ([docs/pocketful-delivery-line.pdf](docs/pocketful-delivery-line.pdf)),
+with the changes listed in §9. Earlier tablekeeper plan: branch `tablekeeper-plan`.
 
 Deadline: **Mon Oct 5 2026, 23:59 PDT.** Rules: `dark-factory-wearedevs/docs/participant-guide.md`
-(authoritative). This plan follows spec-driven development (Spec Kit's phases:
-constitution → specify → clarify → plan → tasks → implement → validate), run by agents.
+(authoritative).
 
 ---
 
@@ -10,183 +12,182 @@ constitution → specify → clarify → plan → tasks → implement → valida
 
 | Weight | Criterion | How this plan earns it |
 |---|---|---|
-| 50% | **Factory**: generic, effective, reusable | Spec-driven mandates with no track words; a requirements list that targets the hidden tests; FACTORY.md with measured cost and time |
-| 25% | **App** | Stage-2 UI brief in the dispatch task; the reviewer checks it at 375 px and desktop |
-| 25% | **Agent teamwork** | Two coders share the work; every task gets a real review; commits authored per seat; one dispatch, no steering |
+| 50% | **Factory**: generic, effective, reusable | 10 role-only mandates that pass the harness scan; a requirements list plus independent acceptance tests aimed at the hidden tests; FACTORY.md with measured cost and time |
+| 25% | **App** | Stage-2 UI brief in the dispatch; qa-explorer tests every flow at 375 px and desktop |
+| 25% | **Agent teamwork** | Two developers plus a tester share the code; review and QA can reject; one dispatch, no steering |
 
 **Gates. Fail one and the entry is not ranked:**
-1. 3+ seats, each with `mandates/<seat>.md` starting with `Harness:` and `Model:`.
-2. `room.json` shows two seats exchanging `@handle` messages in both directions.
+1. 3+ seats; a `mandates/<seat>.md` for **every seat that appears in `room.json`** (including log-watcher), each starting with `Harness:` and `Model:`.
+2. Two seats exchange `@handle` messages in both directions.
 3. `stage-1/` builds and serves from a clean container following its `RUN.md`.
 4. Mandates contain no track vocabulary, and the code is written to the spec, not the tests.
 
-## 2. Workspace layout
+## 2. The factory
 
-```
-~/hackathon/
-  dark-factory-wearedevs/     kickoff package (specs, harness, toy). Never submitted.
-  factory/                    OUR factory inputs (source of truth; copied into the repo at the end)
-    mandates/                 lead.md  coder-a.md  coder-b.md  reviewer.md
-    dispatch-tablekeeper.md   the one task message for the judged run
-    PLAN.md                   this file
-  band-work/
-    toy-result/               practice repo for the toy track
-    practice-1/, practice-2/  tablekeeper practice repos (steering allowed)
-    result/                   THE judged repo: fresh, used once
-    checks/                   harness output directories
-```
-
-## 3. The factory
-
-### Seats
-
-| Seat | Role | Writes | Harness / model (fill in) |
-|---|---|---|---|
-| `lead` | Specify, clarify, plan, tasks, fast-forward merges, stage reports | `specs/stage-N/requirements.md, plan.md, tasks.md` | Claude Code / strongest model you can use |
-| `coder-a` | Coding agent: implements assigned tasks with its own tests | product code + tests on branch `coder-a` | Claude Code or OpenCode+Featherless |
-| `coder-b` | Coding agent: same, in parallel | product code + tests on branch `coder-b` | same or a different model |
-| `reviewer` | Requirements review, task review, stage verification; **can block** | `specs/stage-N/verification.md`, `probes/` | Claude Code / strong model (a different model from the coders is a plus) |
-
-### Who talks to whom
+### Eight roles, ten seats, one room
 
 ```mermaid
-flowchart TD
-    H(["Human: ONE dispatch message<br/>(the only human input)"]) --> L
+flowchart LR
+    H(["You<br/>ONE dispatch"]) --> CO
 
-    subgraph ROOM["BAND room: every message and handoff is logged → room.json"]
-        L["lead<br/>specify · clarify · plan · tasks<br/>writes no product code"]
-        A["coder-a<br/>coding agent"]
-        B["coder-b<br/>coding agent"]
-        R{{"reviewer<br/>independent · CAN BLOCK<br/>never edits code"}}
+    subgraph BUILD["Build loop"]
+        CO["coordinator<br/>plan · route · report"]
+        AR["architect<br/>requirements · design · ADRs"]
+        TE["tester<br/>completeness · acceptance tests"]
+        DA["developer-a"]
+        DB["developer-b"]
+        RV{{"reviewer<br/>verify · merge<br/>CAN BLOCK"}}
     end
 
-    L -- "1 requirements list + full spec" --> R
-    R -- "2 missing requirements" --> L
-    L -- "3 tasks + full spec" --> A
-    L -- "3 tasks + full spec" --> B
-    A -- "4 revision + tests + evidence" --> R
-    B -- "4 revision + tests + evidence" --> R
-    R -. "REJECT: requirement id, quote, observed, repro" .-> A
-    R -. "REJECT: requirement id, quote, observed, repro" .-> B
-    R -- "5 ACCEPT task" --> L
-    L -- "6 fast-forward merge" --> M[("result repo · main")]
-    M --> V["7 reviewer validates the stage<br/>clean clone · isolated harness<br/>evidence for every requirement"]
-    V -- "verified" --> N["stage-N/ done<br/>copy → stage-(N+1)/"]
-    N --> L
+    subgraph SHIP["Ship and watch loop (only if release tooling is set)"]
+        RM["release-manager<br/>build once · stage · promote"]
+        QA{{"qa-explorer<br/>tests staging<br/>CAN BLOCK"}}
+        SRE["sre-monitor<br/>triage alerts"]
+        LW["log-watcher<br/>(program)"]
+    end
+
+    CO -- "full spec" --> AR
+    AR -- "requirements" --> TE
+    TE -- "missing items" --> AR
+    CO -- "tasks + full spec" --> DA & DB
+    DA & DB -- "revision + evidence" --> RV
+    TE -- "acceptance suite" --> RV
+    RV -. "reject: R-id, repro" .-> DA & DB
+    RV -- "stage verified" --> CO
+    CO -- "verified revision" --> RM
+    RM -- "staging address + digest" --> QA
+    QA -- "sign-off" --> RM
+    QA -. "finding" .-> CO
+    RM -- "promoted digest" --> SRE
+    LW -- "alerts + summaries" --> SRE
+    SRE -. "rollback" .-> RM
+    SRE -. "incident → task" .-> CO
+    SRE -- "watch passed" --> CO
 ```
 
-### Spec-driven steps inside one stage
+| Seat | Model | Owns | Rejects when |
+|---|---|---|---|
+| **coordinator** | claude-opus-5-5 | Routing, `tasks.md`, stage + final reports | A handoff is missing the spec, revision or evidence |
+| **architect** | claude-opus-5-5 | `requirements.md` (R1..Rn), `design.md`, ADRs, invariants | A design change breaks a stated invariant |
+| **tester** | claude-sonnet-5 | Completeness review; black-box acceptance suite mapped to R-ids | A requirement has no test |
+| **developer-a / developer-b** | claude-sonnet-5 | Assigned tasks with unit tests, own worktree/branch | — |
+| **reviewer** | claude-opus-5-5 | Clean-copy review, fast-forward merges, isolated harness, stage verification | Any check fails, an R-id lacks evidence, an invariant breaks, test-fitting |
+| **qa-explorer** | claude-sonnet-5 | Exploratory testing of staging (375 px + desktop, lost/out-of-order responses) | A UI state is wrong, an effect is duplicated, an invariant breaks |
+| **release-manager** | claude-sonnet-5 | The only seat that runs containers: build once, staging, blue/green, rollback | The signed-off digest ≠ the promoted digest |
+| **sre-monitor** | claude-sonnet-5 | Triage of watcher alerts during the watch window | A threshold is breached → rollback and/or incident |
+| **log-watcher** | none (Band SDK program) | Tails production logs, runs probes, posts to @sre-monitor | — (never decides) |
+
+All model seats: **Harness: Claude Code**. Mandates are generated from `tools/build_mandates.py`
+(one shared rule set plus a role section) and checked with `tools/scan_mandates.sh`.
+
+### One stage, step by step
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant CO as coordinator
+    participant AR as architect
+    participant TE as tester
+    participant DV as developer-a / -b
+    participant RV as reviewer
+    participant RM as release-manager
+    participant QA as qa-explorer
+    participant SR as sre-monitor
+    CO->>CO: copy stage-(N-1)/ → stage-N/ (drop .git)
+    CO->>AR: full spec + previous docs
+    AR-->>CO: requirements.md (R-ids) + design.md + ADRs
+    CO->>TE: full spec + requirements
+    TE-->>AR: missing / untestable requirements (one round)
+    CO->>DV: tasks (R-ids, files, done test) + full spec
+    par build
+        DV->>RV: revision + unit tests + evidence
+    and prove
+        TE->>RV: acceptance suite + coverage table
+    end
+    RV-->>DV: REJECT (R-id, observed, repro) → fix → re-review
+    RV->>RV: accept → fast-forward main
+    CO->>RV: verify stage N
+    RV-->>CO: isolated harness + acceptance suite + every R-id evidenced
+    opt release tooling set
+        CO->>RM: verified revision
+        RM->>QA: staging address + digest
+        QA-->>RM: sign-off (or finding → CO → new task)
+        RM->>SR: promoted digest (blue/green)
+        SR-->>CO: watch passed (or rollback + incident)
+    end
+    CO->>CO: report.md → next stage
+```
+
+**How bad work gets caught** (for FACTORY.md):
+- **Missing requirement:** the tester's completeness review, before any code.
+- **Wrong behaviour:** reviewer probes and the tester's acceptance suite, both independent of the developers.
+- **Integration breakage:** reviewer's clean clone + isolated harness at stage verification.
+- **UI and recovery bugs:** qa-explorer on the exact image that ships.
+- **Production regression:** the log-watcher's probes → sre-monitor → rollback + incident.
+- **Stuck work:** the same R-id failing three times is reassigned to the other developer.
+- **Test-fitting:** the reviewer rejects code that branches on test inputs.
+
+### Release pipeline (after the reviewer accepts a stage)
 
 ```mermaid
 flowchart LR
-    C["Constitution<br/>mandates/ (generic)"] --> SP["Specify<br/>requirements.md<br/>R1..Rn, assumptions"]
-    SP --> CL["Clarify<br/>reviewer checks<br/>completeness"]
-    CL --> PL["Plan<br/>plan.md<br/>data, locking, time,<br/>export upgrade path"]
-    PL --> TK["Tasks<br/>tasks.md<br/>T1..Tn → R-ids,<br/>split across coders"]
-    TK --> IM["Implement<br/>coder-a ∥ coder-b<br/>one commit per task"]
-    IM --> VA["Validate<br/>verification.md<br/>every R-id has evidence"]
-    VA -. "failed items" .-> IM
+    C["1 Checks<br/>isolated harness · acceptance<br/>gitleaks blocks · Trivy info only<br/><i>reviewer</i>"] --> B["2 Build once<br/>tag by SHA → local registry :5000<br/><i>release-manager</i>"]
+    B --> S["3 Staging :8081<br/>seed · health<br/><i>release-manager</i>"]
+    S --> Q["4 Agent QA<br/>375 px + desktop · lost responses<br/>totals conserved<br/><i>qa-explorer</i>"]
+    Q --> A["5 Approve<br/>digest = signed-off digest<br/>annotated release tag<br/><i>release-manager</i>"]
+    A --> G["6 Blue/green :8080<br/>Caddy switch<br/><i>release-manager</i>"]
+    G --> W["7 Watch 10 min<br/>log-watcher → sre-monitor"]
 ```
 
-### Stage chain (each folder must pass its own stage and all earlier ones, and not the next)
+Same image digest from step 2 to step 6; nothing is rebuilt after QA. **Approval gate** is OFF in the judged
+run (an "approve" click would be steering); in "production mode" the release tooling waits for a human,
+but no seat ever asks.
 
-```mermaid
-flowchart LR
-    S1["stage-1/<br/>JSON API · idempotency<br/>atomic moves · export/import"] --> S2["stage-2/<br/>+ browser UI · lost responses<br/>combined tables"]
-    S2 --> S3["stage-3/<br/>+ dated policies · history<br/>recurring series"]
-    S3 --> S4["stage-4/<br/>+ closure replans<br/>series amendments"]
-```
-
-### Detailed sequence
-
-```
-dispatch (the only human input)
-  │
-  ▼
-lead ── carry forward stage-(N-1)/ → stage-N/ (remove .git)
-  │     SPECIFY   requirements.md: every "must", table row, error, limit → R1..Rn + assumptions A1..
-  │     CLARIFY   → @reviewer completeness review (one round) → add what's missing
-  │     PLAN      plan.md: data model, lock strategy, time handling, export version + upgrade path
-  │     TASKS     tasks.md: T1..Tn, owner, R-ids, files, done test; balanced across coders
-  ▼
-@coder-a  ║  @coder-b         IMPLEMENT in own worktree/branch, tests derived from R-ids,
-          ║                   one commit per task "T3: … (R12, R14)", authored as the seat
-  ▼
-@reviewer TASK REVIEW  fresh checkout, own probes → accept | reject(R-id, quote, observed, repro)
-  │          reject ──► coder fixes, adds the test that would have caught it ──► re-review
-  ▼ accept
-lead  fast-forward main (never resolves conflicts; sends back to coder to merge main)
-  ▼ all tasks on main
-@reviewer VALIDATE  fresh clone, no-cache build, isolated harness run:
-                    claims stage N · earlier stages pass · next stage fails
-                    every R-id has evidence in verification.md · hygiene · no test-fitting
-  ▼ verified
-lead  stage report → post the verified revision → next stage
-```
-
-**How bad work gets caught and fixed** (for FACTORY.md):
-- A missing requirement is caught at the clarify step, before any code.
-- Wrong behaviour is caught at task review by the reviewer's own probes, not the coders' tests.
-- Integration breakage is caught at validation from a clean, isolated build.
-- A seat stuck on the same requirement three times: the lead reassigns it to the other coder.
-- Test-fitting: the reviewer rejects code that branches on test inputs or has no R-id behind it.
-
-### Why each choice (for FACTORY.md's rationale)
-
-- **A requirements list:** the shipped checks cover only 83/41/11/21% of stages 1–4. The hidden tests all come from the spec text, so we turn the text itself into the checklist.
-- **Two coders:** judges read whether the work was distributed. One coder doing 90% "looks the same however many messages it sent".
-- **Reviewer can't edit code:** keeps its verdict independent, and makes every fix visible as a coder commit traced to a room message.
-- **Fast-forward-only merges by the lead:** two coders share one repo without either overwriting the other, and history is never rewritten.
-- **Self-contained handoffs:** Band seats only see messages addressed to them.
-
-## 4. Technical direction (lives in the dispatch task, never in mandates)
+## 3. The service (technical direction lives in the dispatch, never in mandates)
 
 ```mermaid
 flowchart LR
     subgraph IMG["One Docker image · no network at run time · 2 vCPU / 2 GiB"]
-        UI["Browser UI (stage 2+)<br/>HTML · CSS · JS<br/>fonts and assets bundled"]
-        HTTP["HTTP server<br/>Python 3.12 stdlib<br/>queue ≥ 256"]
-        LOCK["one global lock<br/>= requests behave<br/>one at a time"]
-        ST[("in-memory state<br/>versioned export / import")]
-        TZ["zoneinfo + tzdata<br/>DST: skip → reject<br/>repeat → first"]
-        UI --> HTTP --> LOCK --> ST
-        HTTP --> TZ
+        UI["Pages + small in-page script<br/>lost response → uncertain, same key<br/>latest refresh wins<br/>fonts/CSS bundled"]
+        HTTP["HTTP server<br/>Python 3.12 stdlib · queue ≥ 256"]
+        CS["one critical section per write<br/>parse → auth → idempotency → validate → commit"]
+        LED[("in-memory state<br/>append-only ledger<br/>effective + recorded time<br/>versioned export/import")]
+        UI --> HTTP --> CS --> LED
     end
-    HARNESS["grading harness<br/>(up to 50 requests in flight)"] --> HTTP
+    HARNESS["harness · up to 50 in flight"] --> HTTP
 ```
-
-- Python 3.12 standard library, one process. All state in memory behind one global lock, which makes requests behave as if run one at a time, as the spec requires, and makes export an atomic snapshot. Server queue ≥ 256 for 50 simultaneous requests.
-- `tzdata` installed during the image build, then `zoneinfo`: skipped hour → reject; repeated hour → first occurrence; durations in real minutes.
-- Export carries a version; every stage imports all earlier stages' exports.
-- Stage 2 UI: static HTML/CSS/JS from the same process, assets bundled, warm hospitality look, 375 px to desktop.
 
 | Stage | Shipped tests | What the requirements list must catch |
 |---|---|---|
-| 1 | 83% | Idempotency resolved before validation; key scoped per user; error precedence; DST; atomic moves (1–8 items); export/import keeps tokens, receipts, replays |
-| 2 | 41% | Late search responses ignored; lost response → retry with the same key; 409 keeps the form; combined pairs (not transitive); upgrade from stage-1 export; UI states |
-| 3 | **11%** | Explain output (both rules, every table); history numbering and no-op rules; policy selection by local date; revision and accepted terms; recurring series; moves under policies |
-| 4 | 21% | Replan: brute force over ≤6 bookings with a 3-level tie-break, preview stores only the plan, stale plan, apply is atomic; series amend; revision counters |
+| 1 JSON API | 79% | Idempotency on the five write paths, resolved before validation; exact split rounding; atomic settlements; balances always sum to the seed; export/import keeps tokens, receipts, replays |
+| 2 UI + holds | 35% | Lost payment response → uncertain + same-key retry; latest refresh wins; stale pay buttons; holds and partial captures; upgrade from a stage-1 export |
+| 3 Statements + corrections | **9%** | Effective vs recorded time; historical overdraft checks; stable statement pagination; historical holds |
+| 4 Refunds + batch corrections | 16% | Refunds from available funds; batch corrections must include every member of a settlement; strict error precedence |
 
-## 5. Setup (do once, today)
+Stage chain: each folder is the previous one copied forward, passes every earlier suite, and never the next.
 
-```sh
-# kickoff package + harness
-cd ~/hackathon/dark-factory-wearedevs
-python3.12 -m venv .venv && . .venv/bin/activate      # any Python 3.12+
-python -m pip install -r harness/requirements.txt
-python -m playwright install chromium
-python -m harness --help
-docker --version                                      # the Docker daemon must be running
+## 4. Workspace
 
-# practice repo for the toy
-mkdir -p ../band-work/toy-result/stage-1 ../band-work/toy-result/mandates ../band-work/checks
-cp scaffold/* ../band-work/toy-result/stage-1/
-git -C ../band-work/toy-result init -b main
+```
+~/hackathon/
+  dark-factory-wearedevs/     kickoff package (specs, harness, toy); read only
+  factory/                    THIS repo: mandates/, tools/, setup-seats.sh, dispatch-*.md, docs/
+  band-work/
+    .claude/settings.json     pre-allowed commands for every seat (copied by setup-seats.sh)
+    toy-result/               toy rehearsal repo
+    practice-1/, practice-2/  pocketful practice repos (steering allowed)
+    result/                   THE judged repo: fresh, used once
+    checks/                   harness output directories
 ```
 
-**Band Desktop seats.** Create 4 seats named exactly `lead`, `coder-a`, `coder-b`, `reviewer`. The mandate file names must match the seat names as the room shows them. Paste each seat's mandate as its standing instructions. Then confirm each can `@`-message another and get a reply. Run `/jam as <role> with <handle>` in each Claude Code session, or create them with **New local agent** in Band Desktop.
+## 5. Setup
 
-**Secrets:** Featherless key only in `~/.zshrc` or `~/.config/opencode/opencode.json`, never in a repo, since `room.json` isn't redacted.
+See [docs/setup-notes.md](docs/setup-notes.md). In short:
+1. Python 3.12 venv + `pip install -r harness/requirements.txt` + Playwright; Docker running.
+2. Delete Band's preset agents (free tier: 10 agents; we use 10).
+3. `DRY_RUN=1 ./setup-seats.sh`, then `./setup-seats.sh` (creates the 9 model seats).
+4. Start log-watcher (Band SDK program; to be written, see §7).
+5. New room → add all ten → test one `@handle` exchange each way.
 
 ## 6. Schedule
 
@@ -195,82 +196,55 @@ gantt
     title CoolHackers · Sep 26 – Oct 5 2026
     dateFormat YYYY-MM-DD
     axisFormat %a %d
-    section Build the factory
-    Setup + seats             :s1, 2026-09-26, 1d
-    Toy rehearsal             :s2, 2026-09-27, 1d
-    Practice 1 (steering ok)  :s3, 2026-09-28, 2d
-    Tune mandates + Practice 2 (hands off) :s4, 2026-09-30, 2d
+    section Factory
+    Seats set up, toy run, offline check  :a1, 2026-09-26, 2d
+    Practice run stages 1-2 (steering ok) :a2, 2026-09-28, 2d
+    Release script, staging, watcher      :a3, 2026-09-30, 1d
+    Practice stages 3-4 hands off, freeze mandates :a4, 2026-10-01, 1d
     section Judged run
-    Fresh room, one dispatch  :crit, j1, 2026-10-02, 1d
-    Buffer (no re-dispatch)   :j2, 2026-10-03, 1d
+    Fresh room + repo, one dispatch       :crit, j1, 2026-10-02, 1d
+    Buffer (ask Discord about a 2nd fresh run) :j2, 2026-10-03, 1d
     section Submit
-    Repo, FACTORY.md, video   :u1, 2026-10-04, 1d
-    Submit before midnight PDT :crit, milestone, u2, 2026-10-05, 0d
+    room.json, FACTORY.md, video          :s1, 2026-10-04, 1d
+    Submit before midnight PDT            :crit, milestone, s2, 2026-10-05, 0d
 ```
 
-| When | Goal | Done when |
-|---|---|---|
-| **Sat Sep 26** | Setup (§5). Fill in `Harness:` and `Model:` in each mandate. | `harness --help` works; 4 seats reply to `@` messages |
-| **Sun Sep 27** | **Toy rehearsal**, all 4 stages, with our mandates. Download `room.json`; `harness check` on the toy repo. | Gates 1, 2 and 4 pass on the toy; first cost and time numbers |
-| **Mon–Tue Sep 28–29** | **Practice 1** on tablekeeper (`band-work/practice-1`). Steering allowed. Note every time we had to step in. | Stage 1 claims 1 in isolated mode |
-| **Wed–Thu Sep 30–Oct 1** | Fix the mandates for each step-in (generically!). **Practice 2** without touching, as far as it gets. Re-run the banned-word scan. | A hands-off run reaches stage 2+ |
-| **Fri Oct 2** | **Judged run**: fresh room + fresh `band-work/result`, paste `dispatch-tablekeeper.md` once, then hands off. Only watch. | Lead's final report |
-| **Sat Oct 3** | Buffer if the run is still going. Never re-dispatch; a rerun is disqualified steering. | — |
-| **Sun Oct 4** | Assemble the submission (§7), record the video. | Clean-clone checks pass |
-| **Mon Oct 5** | Submit on lablab before 23:59 PDT. Keep the receipt. | Submitted |
+Rule: build the release script, staging and watcher **only after a practice run reaches stage 2 in
+isolated mode**. If time runs short, dispatch with `Release tooling: none`; the ship loop is not scored.
 
-**Budget check after the toy run:** multiply the toy's requests and cost by roughly 20–40 for the full tablekeeper run. If the $25 of Featherless credits can't cover it, move the lead and reviewer to a Claude subscription seat and keep the coders on Featherless.
+## 7. Work for the humans
 
-## 7. Submission checklist
-
-The humans write only README.md, FACTORY.md, mandates/ and room.json. The band writes `stage-N/` and `specs/`.
-
-- [ ] `mandates/` copied from `factory/mandates/`, with `Harness:` and `Model:` filled in with exact model ids
-- [ ] `room.json`: Band console → room → ⋮ → Download → **Download full session** → rename. Read it for secrets.
-- [ ] `README.md`: team, track, how to read the repo, stages reached
-- [ ] `FACTORY.md`:
-  - seat setup, step by step
-  - the flow diagram
-  - rationale (§3)
-  - what we tried that failed (from the practice runs)
-  - **measured** time per stage and model spend per seat
-  - how bad work is caught, with 2–3 real rejections from `room.json` and the commits that fixed them
-- [ ] Only completed stage folders; no `.git` inside any stage folder
-- [ ] Fresh clone → `python -m harness check <clone> --track tablekeeper` passes
-- [ ] Fresh clone → `python -m harness run --track tablekeeper --repo <clone> --all --mode isolated`: count from stage 1 until the first folder that doesn't claim its stage
-- [ ] Follow each `RUN.md` by hand and use the UI
-- [ ] Push history unchanged (no squash or rebase); public GitHub repo, cloneable without Band
-- [ ] lablab form: title, short and long description, tags, cover image, slides, **video**, repo URL
-
-**Video (3–5 min):**
-1. 30 s: the problem, and the factory diagram
-2. 90 s: **the Band Desktop room recording**, showing the dispatch, a lead → coder handoff, a reviewer **rejection** and the fix coming back. This part is required.
-3. 60 s: the app (search grid, booking, a double-book attempt refused, lookup and cancel) on desktop and phone width
-4. 30 s: the isolated harness result and cost/time numbers
-5. 15 s: the mandates are generic (point them at the toy or a different problem)
-
-## 8. Risks
-
-| Risk | Mitigation |
+| Owner | Work |
 |---|---|
-| A seat asks the human a question during the judged run | Every mandate forbids it; practice 2 is a hands-off rehearsal |
-| Track words slip into a mandate while tuning | Re-run the vocabulary scan after every mandate edit (command below) |
-| Coders fit the code to the shipped tests | Coders test from R-ids; reviewer rejects test-fitting; dispatch forbids reading test sources |
-| Budget runs out mid-run | Measure on the toy; stronger model only for lead and reviewer |
-| Stage folder passes the next stage's tests (overshoot) | Dispatch forbids later features; reviewer checks that the next suite fails |
-| A nested `.git` makes a stage folder arrive empty for judges | Lead deletes it at carry-forward; reviewer checks hygiene; clean-clone check |
-| Seats can't connect to BAND (plugin or relay errors) | Run the seats on one dedicated personal machine with personal model accounts; ask in the BAND Discord early |
+| Host machine | Run setup, practice runs and the judged run; nobody posts in the judged room |
+| Mandate tuning | Read practice room logs; turn every stall or human question into a generic mandate fix; `tools/build_mandates.py` + `tools/scan_mandates.sh` |
+| Release tooling | `release/` script: local registry :5000, staging :8081, Caddy blue/green :8080, rollback; log-watcher Band SDK program with the probes in the dispatch |
+| Docs + video | README.md, FACTORY.md (measured cost via `band usage`, time per stage, real rejections from room.json), slides, video |
 
-Vocabulary scan (run from `~/hackathon/dark-factory-wearedevs`):
+## 8. Submission checklist
 
-```sh
-python3 -c "
-import pathlib,sys; sys.path.insert(0,'.')
-from harness.vocabulary import terms_in, for_track
-b=set(for_track('tablekeeper'))|set(for_track('pocketful'))
-for f in pathlib.Path('../factory/mandates').glob('*.md'):
-  for n,l in enumerate(f.read_text().splitlines(),1):
-    h=[t for k,t in terms_in(l) if t in b]
-    h and print(f.name,n,h)
-print('scan done')"
-```
+- [ ] `mandates/` = this repo's `mandates/` (one per seat in room.json, Harness/Model filled in)
+- [ ] `room.json`: Band console → room → ⋮ → Download → **Download full session**; read it for secrets
+- [ ] `README.md`, `FACTORY.md` written by us (seats, setup, rationale, what failed, measured cost/time, how bad work was caught)
+- [ ] Only completed stage folders; no `.git` inside any
+- [ ] Fresh clone → `harness check --track pocketful` passes; `harness run --all --mode isolated`
+- [ ] Follow each RUN.md by hand; use the UI
+- [ ] Push history unchanged; public repo; lablab form with video (room recording required) and slides
+
+**Video (3–5 min):** the factory diagram → the Band room (dispatch, a handoff, a reviewer or QA
+rejection and the fix) → the app on desktop and phone width → isolated harness result, cost and time →
+the mandates pointed at a different problem.
+
+## 9. Changes from the original deck, and why
+
+| Change | Why |
+|---|---|
+| **developer → developer-a + developer-b** | Judges read whether the work was distributed; one seat writing all the code "looks the same however many messages it sent" |
+| **log-watcher gets a mandate file** (`Harness: Band SDK program`, `Model: none`) | It posts in the room, so gate 1 requires a mandate named after it |
+| **Architect writes a numbered requirements list; tester maps tests to R-ids** | "A spec rule has no test" needs a list of rules; 9%/16% of stage 3/4 tests are shipped |
+| **Tester does a completeness review first** | Catches missing requirements before code (spec-driven "clarify") |
+| **UI: in-page script for pay/refresh/request/split** | A plain form post can't show `uncertain` and retry with the same key after a lost response |
+| **Ship loop runs after a stage is verified, never overlapping the next; bounded 10-min watch; watcher stops at the final report** | The unattended run must finish; findings become tasks in the current stage, never edits to an accepted one |
+| **gitleaks blocks, Trivy is informational** | Base-image CVEs would otherwise block every stage |
+| **Judged run Oct 2, not Oct 3–4** | Leaves a day if it fails |
+| **Pre-allowed commands, `git push` denied** | No stalls on prompts; humans push, so no credentials reach room.json |
