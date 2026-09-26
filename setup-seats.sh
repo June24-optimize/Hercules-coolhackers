@@ -33,6 +33,7 @@ create() {
   [ -n "$DRY" ] && instructions=()
   echo "== $name ($model)"
   "$BAND" agent create \
+    --session "$name" \
     --name "$name" \
     --description "$description" \
     --cwd "$WORKDIR" \
