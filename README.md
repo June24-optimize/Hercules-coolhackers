@@ -14,5 +14,6 @@ Design by Srilekha ([deck](docs/pocketful-delivery-line.pdf)), with the changes 
 | [dispatch-pocketful.md](dispatch-pocketful.md) | The single task message for the judged run (all track detail lives here) |
 | [dispatch-toy.md](dispatch-toy.md) | The toy rehearsal task |
 | [docs/setup-notes.md](docs/setup-notes.md) | Step-by-step setup and submission notes |
+| [vm/](vm/) | Setup script and guide for hosting the seats on an Ubuntu cloud VM |
 
 Spec package: https://github.com/band-ai/dark-factory-wearedevs · Earlier tablekeeper plan: branch `tablekeeper-plan`.
