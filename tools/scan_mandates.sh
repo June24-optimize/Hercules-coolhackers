@@ -3,7 +3,7 @@
 # against mandates/. Usage: tools/scan_mandates.sh [path/to/dark-factory-wearedevs]
 set -euo pipefail
 KICKOFF=${1:-$HOME/hackathon/dark-factory-wearedevs}
-MANDATES="$(cd "$(dirname "$0")/.." && pwd)/mandates"
+MANDATES="$(cd "$(dirname "$0")/.." && pwd)/${MANDATES_DIR:-mandates}"
 cd "$KICKOFF"
 python3 - "$MANDATES" <<'PY'
 import pathlib, re, sys

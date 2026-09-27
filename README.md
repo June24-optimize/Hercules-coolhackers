@@ -15,5 +15,7 @@ Design by Srilekha ([deck](docs/pocketful-delivery-line.pdf)), with the changes 
 | [dispatch-toy.md](dispatch-toy.md) | The toy rehearsal task |
 | [docs/setup-notes.md](docs/setup-notes.md) | Step-by-step setup and submission notes |
 | [vm/](vm/) | Setup script and guide for hosting the seats on an Ubuntu cloud VM |
+| [seats/](seats/) | Seats as Band SDK programs on OpenCode + Featherless; `lite` 3-seat profile for rehearsals |
+| [mandates-lite/](mandates-lite/) | Mandates for the 3-seat lite profile (generated) |
 
 Spec package: https://github.com/band-ai/dark-factory-wearedevs · Earlier tablekeeper plan: branch `tablekeeper-plan`.
