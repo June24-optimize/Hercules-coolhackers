@@ -4,21 +4,20 @@
 #
 # Usage (the user key is read from the environment, never from argv):
 #   read -s "BAND_USER_API_KEY?Band user API key: " && export BAND_USER_API_KEY   # zsh
-#   seats/register_seats.sh                       # lite profile: coordinator developer-a reviewer
-#   PROFILE=full seats/register_seats.sh          # all nine model seats
+#   seats/register_seats.sh      # registers every seat whose mandate says Harness: OpenCode
 set -euo pipefail
 
 : "${BAND_USER_API_KEY:?export BAND_USER_API_KEY (a band_u_ key) first}"
 export BAND_BASE_URL=${BAND_BASE_URL:-https://app.band.ai}
-PROFILE=${PROFILE:-lite}
 OUT=${SEATS_CONFIG:-$HOME/hackathon/band-work/seats/agent_config.yaml}
 REGISTER_URL="https://raw.githubusercontent.com/band-ai/add-band/main/scripts/register-agent.sh"
+MANDATES="$(cd "$(dirname "$0")/.." && pwd)/mandates"
 
-case "$PROFILE" in
-  lite) SEATS=(coordinator developer-a reviewer) ;;
-  full) SEATS=(coordinator architect tester developer-a developer-b reviewer qa-explorer release-manager sre-monitor) ;;
-  *) echo "PROFILE must be lite or full" >&2; exit 1 ;;
-esac
+SEATS=()
+for f in "$MANDATES"/*.md; do
+  grep -q '^Harness: OpenCode$' "$f" && SEATS+=("$(basename "$f" .md)")
+done
+[ ${#SEATS[@]} -gt 0 ] || { echo "no OpenCode seats in $MANDATES" >&2; exit 1; }
 
 mkdir -p "$(dirname "$OUT")"
 umask 077

@@ -7,8 +7,10 @@ OpenCode server; each Band room gets its own OpenCode session per seat.
     opencode serve --hostname=127.0.0.1 --port=4096     # terminal 1, from an empty directory
     uv run --project seats python seats/run_seats.py     # terminal 2
 
+This is the alternative to setup-seats.sh's Band-owned OpenCode seats. It runs only the
+seats whose mandate says `Harness: OpenCode`.
+
 Environment (all optional):
-    PROFILE          lite (3 seats, default) or full
     SEATS_CONFIG     agent_config.yaml from register_seats.sh
     WORKDIR          absolute directory the seats may change (default ~/hackathon/band-work)
     OPENCODE_URL     OpenCode server (default http://127.0.0.1:4096)
@@ -29,8 +31,7 @@ from band.adapters.opencode import OpencodeAdapter, OpencodeAdapterConfig
 from band.core.types import Emit
 
 REPO = Path(__file__).resolve().parent.parent
-PROFILE = os.getenv("PROFILE", "lite")
-MANDATES = REPO / ("mandates-lite" if PROFILE == "lite" else "mandates")
+MANDATES = REPO / "mandates"
 SEATS_CONFIG = Path(os.getenv("SEATS_CONFIG", "~/hackathon/band-work/seats/agent_config.yaml")).expanduser()
 WORKDIR = str(Path(os.getenv("WORKDIR", "~/hackathon/band-work")).expanduser())
 OPENCODE_URL = os.getenv("OPENCODE_URL", "http://127.0.0.1:4096")
@@ -41,8 +42,8 @@ logger = logging.getLogger("seats")
 
 
 def seat_names() -> list[str]:
-    # log-watcher is a program, not a model seat.
-    return sorted(p.stem for p in MANDATES.glob("*.md") if p.stem != "log-watcher")
+    return sorted(p.stem for p in MANDATES.glob("*.md")
+                  if re.search(r"(?m)^Harness:\s*OpenCode\s*$", p.read_text()))
 
 
 def make_adapter(seat: str) -> OpencodeAdapter:
@@ -81,7 +82,7 @@ async def main() -> None:
                                   config_path=SEATS_CONFIG))
             logger.info("seat online: %s", seat)
             agents.append(agent)
-        logger.info("%d seats online in %s (profile %s)", len(agents), WORKDIR, PROFILE)
+        logger.info("%d seats online in %s", len(agents), WORKDIR)
         await asyncio.gather(*(a.run_forever() for a in agents))
 
 

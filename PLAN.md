@@ -3,6 +3,10 @@
 Design: **Srilekha's "Pocketful Delivery Line"** ([docs/pocketful-delivery-line.pdf](docs/pocketful-delivery-line.pdf)),
 with the changes listed in §9. Earlier tablekeeper plan: branch `tablekeeper-plan`.
 
+> **Current design: the lean four-seat factory in [§10](#10-lean-factory-v2-after-the-toy-rehearsal).**
+> §2's ten-seat design, the ship-and-watch loop, and the setup steps in §5 are kept for the
+> record and are superseded where §10 differs.
+
 Deadline: **Mon Oct 5 2026, 23:59 PDT.** Rules: `dark-factory-wearedevs/docs/participant-guide.md`
 (authoritative).
 
@@ -182,12 +186,13 @@ Stage chain: each folder is the previous one copied forward, passes every earlie
 
 ## 5. Setup
 
-See [docs/setup-notes.md](docs/setup-notes.md). In short:
+See [docs/setup-notes.md](docs/setup-notes.md). In short (lean factory v2, §10):
 1. Python 3.12 venv + `pip install -r harness/requirements.txt` + Playwright; Docker running.
-2. Delete Band's preset agents (free tier: 10 agents; we use 10).
-3. `DRY_RUN=1 ./setup-seats.sh`, then `./setup-seats.sh` (creates the 9 model seats).
-4. Start log-watcher (Band SDK program; to be written, see §7).
-5. New room → add all ten → test one `@handle` exchange each way.
+2. Delete any Band agents with the seat names (free tier: 10 agents; we use 4).
+3. Claude login working (`claude auth status`, then a one-line `claude -p`); Featherless key in
+   launchd (`launchctl setenv FEATHERLESS_API_KEY "$FEATHERLESS_API_KEY"`, macOS).
+4. `DRY_RUN=1 WORKDIR=… ./setup-seats.sh`, then without `DRY_RUN` (creates the four seats).
+5. New room → add all four → test one `@handle` exchange each way.
 
 ## 6. Schedule
 
@@ -248,3 +253,68 @@ the mandates pointed at a different problem.
 | **gitleaks blocks, Trivy is informational** | Base-image CVEs would otherwise block every stage |
 | **Judged run Oct 2, not Oct 3–4** | Leaves a day if it fails |
 | **Pre-allowed commands, `git push` denied** | No stalls on prompts; humans push, so no credentials reach room.json |
+## 10. Lean factory v2 (after the toy rehearsal)
+
+### What the rehearsal showed
+
+Toy rehearsal on Sep 28: three OpenCode seats (coordinator, developer-a, reviewer) on
+Featherless `zai-org/GLM-5.2`, one dispatch, 61 minutes. Stage 1 was verified (harness 8/8,
+reviewer accepted, 22 independent probes, 200 concurrent requests); stage 2 produced
+requirements and tasks but no code. Cost: **$12.40 for 410 billed requests** (186 turns,
+311 tool calls). Findings from the Band activity log:
+
+| # | Finding | Evidence | Fix |
+|---|---|---|---|
+| 1 | Seats read the supplied test files | coordinator read all four toy stages' tests; developer-a read the stage-1 test before coding | Test folders and harness source unreadable in both permission files; rule in every mandate and dispatch |
+| 2 | Coordinator gave up after 2 minutes and wrote the code | handoff 23:06, developer-a started 23:06; "status check" 23:08 and 23:09; coordinator wrote the service from 23:11 | One acknowledgement per handoff; wait ≥ 15 min, then one identical resend; never do another seat's work |
+| 3 | Replies not delivered | reviewer: "my ACP replies don't seem to be landing" | Only send-tool messages are delivered; plain reply text is never seen |
+| 4 | Stale instructions | developer-a kept on stage 1 while the stage-2 handoff had been sent twice; 13 min of stage 2 with no code | Every handoff names stage and task id and supersedes earlier ones |
+| 5 | Coordinator merged and flip-flopped | "adopt", "restore", "restore" commits 23:32–23:41 | Coordinator never writes code or tests and never merges; reviewer is the only merger |
+| 6 | Condensed resends | third stage-2 handoff was "condensed" | Resends are identical and complete |
+| 7 | Chatter costs turns | "Thank you", "Acknowledged", "STOP"; reviewer 77 turns vs 67 tool calls | No thanks/acknowledge-only messages beyond the one acknowledgement |
+| 8 | Two task lists | developer-a created 9 tasks of its own | Only the coordinator creates tasks |
+
+### The four seats
+
+```mermaid
+flowchart LR
+    H(["You<br/>ONE dispatch"]) --> CO
+    CO["coordinator<br/>requirements · design · tasks · reports<br/>Claude Code · claude-sonnet-5"]
+    TE["tester<br/>completeness · acceptance · invariant attacks · UI<br/>OpenCode · GLM-5.3-Flash"]
+    DV["developer<br/>code + unit tests, own branch<br/>OpenCode · GLM-5.3-Flash"]
+    RV{{"reviewer<br/>verify · stress invariants · merge<br/>CAN BLOCK · Claude Code · claude-sonnet-5"}}
+    CO -- "spec + requirements + design" --> TE
+    TE -- "missing items" --> CO
+    CO -- "tasks + full spec" --> DV
+    DV -- "branch + evidence" --> RV
+    TE -- "acceptance suite" --> RV
+    RV -. "reject: R-id, repro" .-> DV
+    RV -- "merged / stage verified" --> CO
+```
+
+| Seat | Harness · model | Owns | Rejects when |
+|---|---|---|---|
+| **coordinator** | Claude Code · `claude-sonnet-5` | requirements (R-ids), design, ADRs, invariants, tasks, reports | a handoff lacks the spec, revision or evidence; a change breaks an invariant |
+| **tester** | OpenCode · `featherless/zai-org/GLM-5.3-Flash` | completeness review; acceptance suite mapped to R-ids; invariant attacks; UI checks at phone and desktop width | a requirement has no test |
+| **developer** | OpenCode · `featherless/zai-org/GLM-5.3-Flash` | tasks with unit tests, own worktree and branch | — |
+| **reviewer** | Claude Code · `claude-sonnet-5` | clean-copy review, fast-forward merges, isolated harness, invariant stress run, `verification.md` | a check fails, an R-id lacks evidence, an invariant breaks, test-fitting |
+
+### What changed from §2, and why
+
+| Change | Why |
+|---|---|
+| **10 seats → 4** | Judges don't score seat count. Every seat adds full-spec handoffs, messages and wake-ups; the rehearsal's cost and failures came from coordination, not capacity |
+| **architect → coordinator** | In the rehearsal the coordinator wrote good requirements (R1–R30) and the completeness review caught the gap (R30); a separate architect adds a handoff chain per stage |
+| **developer-a + developer-b → developer** | A second developer doubles handoffs, merges and resend risk. Distributed work is shown by four seats with distinct committed work (requirements and reports, tests, code, verification and merges) and by real review rejections |
+| **qa-explorer → tester** | The tester already drives the service; interface checks at phone and desktop width join its suite |
+| **Ship-and-watch loop cut** (release-manager, sre-monitor, log-watcher, staging, blue/green) | Not in the specs or the rubric; the specs only require a Dockerfile, RUN.md, health and no 5xx. Kept as a documented extension for FACTORY.md and the video |
+| **Money invariants move into verification** | They were only in the watcher's probes; now the tester attacks them and the reviewer stress-tests them each stage (see the dispatch) |
+| **Export includes idempotency records and tokens** | Otherwise a retry after an upgrade moves money twice |
+| **Models: Claude Sonnet for coordinator + reviewer, GLM-5.3-Flash for tester + developer** | Coordinator and reviewer used ~75% of the rehearsal's turns; on a Claude subscription they cost no per-token spend. GLM-5.3-Flash is about 9× cheaper than GLM-5.2 ($0.15 / $0.50 vs $1.40 / $4.40 per million input / output tokens) |
+
+### Budget rule
+
+Before the judged run, a stage-1-only toy confirmation run on the four seats must show the
+fixes hold (messages delivered, no takeovers, no test reads) and measure the Featherless
+cost of one stage. Size the Featherless top-up from that number, with headroom for
+Pocketful's specs being about 10× longer than the toy's.

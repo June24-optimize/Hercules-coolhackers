@@ -9,6 +9,10 @@ Unscored practice. Prepare the repo first:
     git -C ../band-work/toy-result add -A
     git -C ../band-work/toy-result -c user.name=human -c user.email=human@factory.invalid commit -m "scaffold"
 
+Replace every `/Users/wanyubian/hackathon` below with the workspace path on the machine that
+runs the seats. For a short confirmation run, change "all four stages of the toy track, one
+after the other" to "stage 1 of the toy track only" and list only the stage-1 spec.
+
 ---
 
 @coordinator Build all four stages of the toy track, one after the other,
@@ -28,6 +32,10 @@ Stage N lives in stage-N/ with a Dockerfile, RUN.md and source; stage-2/ starts 
 the verified stage-1/, and so on (delete any .git in a copy). Documents go in specs/stage-N/.
 
 Release tooling: none
+
+Never open the test files under the specification package's toy/test/ folder or the harness
+source code; the seats' permissions block it. Run the checks, read the failing log, then the
+spec.
 
 Checks (the reviewer runs these):
 

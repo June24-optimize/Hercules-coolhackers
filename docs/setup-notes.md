@@ -26,14 +26,22 @@ Use absolute paths (`/Users/<you>/...`) everywhere you give a path to a seat.
      && .venv/bin/pip install -r harness/requirements.txt \
      && .venv/bin/python -m playwright install chromium
    ```
-3. Create the seats: `./setup-seats.sh` (or in Band Desktop, **New local agent → Claude Code**
-   once per seat, named exactly like its mandate file).
+3. Create the four seats: `WORKDIR=<absolute band-work path> ./setup-seats.sh` (run it with
+   `DRY_RUN=1` first). Each seat's harness and model come from its mandate:
+   coordinator and reviewer on Claude Code (your Claude login: check it with
+   `claude auth status` and a one-line `claude -p` call), tester and developer on OpenCode
+   with Featherless.
+   - Featherless key for the OpenCode seats (macOS): Band's background service does not
+     read your shell profile, so once per login run
+     `launchctl setenv FEATHERLESS_API_KEY "$FEATHERLESS_API_KEY"`;
+     `tools/opencode-featherless` reads it from there at every seat start.
    - Working directory: an absolute path. With a relative path, a seat can create a repo only it can see.
    - Instructions: the seat's mandate file (the script links it live).
-   - Permissions: pre-allow git, docker and the harness command (`claude-settings.json`), so no
-     seat stalls on a permission prompt during the judged run.
-   - Leave Docker Sandbox off for the seats that run containers (reviewer, release-manager),
-     so staging is visible to everyone.
+   - Permissions: pre-allowed commands, and a ban on reading the kickoff package's test files
+     and harness source: `claude-settings.json` for the Claude Code seats and
+     `opencode-permissions.json` for the OpenCode seats (the script copies both into the
+     working directory), so no seat stalls on a permission prompt.
+   - Leave Docker Sandbox off for every seat, so all seats share one Docker and one repository.
 4. Each seat commits under its own name (the mandates say so), so the history shows who did what.
 5. Put all the seats in one room, then send one test message each way between two seats. That
    also exercises gate 2.

@@ -12,7 +12,8 @@
         "zai-org/GLM-5.2": {},
         "moonshotai/Kimi-K2.5": {},
         "MiniMaxAI/MiniMax-M2.5": {},
-        "deepseek-ai/DeepSeek-V3.2": {}
+        "deepseek-ai/DeepSeek-V3.2": {},
+        "zai-org/GLM-5.3-Flash": {}
       }
     }
   }
