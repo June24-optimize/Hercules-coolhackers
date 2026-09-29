@@ -27,7 +27,7 @@ DRY=${DRY_RUN:+--dry-run}
 # Permissions for both harnesses live in the seats' shared working directory.
 mkdir -p "$WORKDIR/.claude"
 cp "$FACTORY_DIR/claude-settings.json" "$WORKDIR/.claude/settings.json"
-cp "$FACTORY_DIR/opencode-permissions.json" "$WORKDIR/opencode.json"
+cp "$FACTORY_DIR/opencode-seats.json" "$WORKDIR/opencode.json"
 chmod 755 "$LAUNCHER"
 
 create() {

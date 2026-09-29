@@ -42,5 +42,5 @@ Then in the Band console (app.band.ai): new chat → add the seats → paste the
 inside `WORKDIR` (default `~/hackathon/band-work`) but not sandboxed. Run them on a machine
 or VM you're comfortable handing to an unattended agent. `question_mode="auto_reject"` keeps
 OpenCode from posting questions to the human. The permission rules in
-`opencode-permissions.json` apply only when that file is the working directory's
+`opencode-seats.json` apply only when that file is the working directory's
 `opencode.json` (`setup-seats.sh` copies it there).

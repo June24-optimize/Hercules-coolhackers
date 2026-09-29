@@ -312,6 +312,24 @@ flowchart LR
 | **Export includes idempotency records and tokens** | Otherwise a retry after an upgrade moves money twice |
 | **Models: Claude Sonnet for coordinator + reviewer, GLM-5.3-Flash for tester + developer** | Coordinator and reviewer used ~75% of the rehearsal's turns; on a Claude subscription they cost no per-token spend. GLM-5.3-Flash is about 9× cheaper than GLM-5.2 ($0.15 / $0.50 vs $1.40 / $4.40 per million input / output tokens) |
 
+### Context economy (why each step got cheaper)
+
+Every seat keeps one conversation per room for the whole run, and every step re-sends all of
+it; in the rehearsal that averaged about $0.03 per request. File reads and command output,
+not messages, grow it fastest. So:
+
+| Lever | Where |
+|---|---|
+| Handoffs paste the complete task and the **current** stage's source text (as the rules require); committed working documents go by path + commit | shared mandate rules |
+| One stage handoff per seat covering all its tasks; follow-ups carry only what is new | coordinator mandate, shared rules |
+| Read logs and files selectively; never re-read an unchanged file; keep reports short | shared mandate rules ("Context economy") |
+| Tool output capped at 300 lines / 16 KB per call (the rest saved to disk); old tool outputs pruned; compaction starts about halfway through the 262K context (`reserved: 131072`) | `opencode-seats.json` (OpenCode seats) |
+
+Band's own `--runtime-compact-at` is not supported by either runtime, so compaction is set in
+OpenCode's config. Claude Code compacts on its own near its limit, and those two seats run on
+a flat subscription. Whether `reserved` triggers compaction early as intended is checked in
+the confirmation run.
+
 ### Budget rule
 
 Before the judged run, a stage-1-only toy confirmation run on the four seats must show the

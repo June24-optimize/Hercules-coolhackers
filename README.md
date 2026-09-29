@@ -14,7 +14,7 @@ in [PLAN.md §10](PLAN.md#10-lean-factory-v2-after-the-toy-rehearsal).
 | [setup-seats.sh](setup-seats.sh) | Creates the four seats in Band (Claude Code or OpenCode, per mandate), live-linked to their mandates |
 | [tools/opencode-featherless](tools/opencode-featherless) | Launcher for the OpenCode seats: hands them the Featherless key from launchd (macOS) |
 | [claude-settings.json](claude-settings.json) | Claude Code seats: pre-allowed commands; git push denied; test files and harness source unreadable |
-| [opencode-permissions.json](opencode-permissions.json) | OpenCode seats: the same rules in OpenCode's format |
+| [opencode-seats.json](opencode-seats.json) | OpenCode seats: the same permission rules, plus tool-output limits and early compaction to keep contexts (and cost) small |
 | [dispatch-pocketful.md](dispatch-pocketful.md) | The single task message for the judged run (all track detail lives here) |
 | [dispatch-toy.md](dispatch-toy.md) | The toy rehearsal task |
 | [docs/setup-notes.md](docs/setup-notes.md) | Step-by-step setup and submission notes |

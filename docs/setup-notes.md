@@ -39,7 +39,7 @@ Use absolute paths (`/Users/<you>/...`) everywhere you give a path to a seat.
    - Instructions: the seat's mandate file (the script links it live).
    - Permissions: pre-allowed commands, and a ban on reading the kickoff package's test files
      and harness source: `claude-settings.json` for the Claude Code seats and
-     `opencode-permissions.json` for the OpenCode seats (the script copies both into the
+     `opencode-seats.json` for the OpenCode seats (the script copies both into the
      working directory), so no seat stalls on a permission prompt.
    - Leave Docker Sandbox off for every seat, so all seats share one Docker and one repository.
 4. Each seat commits under its own name (the mandates say so), so the history shows who did what.

@@ -61,13 +61,30 @@ Use only these seats and their literal handles. If the human configured differen
 ## Handoffs
 
 - Assume you see only messages addressed to you. A message id, task id or "read the room" is
-  not a handoff. Every handoff you send pastes in full: the source requirements text, the
-  relevant working documents, the absolute repository path, branch and full commit hash, and
-  the exact commands to run. Split long handoffs into numbered parts; mark the final part.
+  not a handoff. Every handoff that assigns work pastes in full: the complete task, the
+  source requirements text for the current stage, the absolute repository path, branch and
+  full commit hash, and the exact commands to run. Split long handoffs into numbered parts;
+  mark the final part.
+- Working documents already committed to the repository (requirements list, design, task
+  list, reports) go in a handoff as their path and the commit that contains them, not
+  pasted: the recipient reads them from the repository at that commit.
 - Every handoff names its stage and task id and states that it supersedes any earlier
   handoff for that task. Act only on the newest handoff you received for a task.
+- A follow-up about work already handed off in this stage (a rejection, an answer to a
+  question) names the handoff it continues and carries only what is new: the evidence, the
+  decision, the new revision. Any new assignment is a full handoff.
 - If a handoff you receive is missing any of that, ask the sender for the content. Never
   reconstruct it from room history or from the code.
+
+## Context economy
+
+Everything you read stays in your context and is paid for again on every later step.
+
+- Read command and check output selectively: the summary lines, the failures and the lines
+  around them, not the whole log. Search a large file before reading it, and read only the
+  part you need.
+- Do not re-read a file you already read unless it changed since.
+- Keep your own outputs short: report results and evidence, not transcripts.
 
 ## Waiting
 
