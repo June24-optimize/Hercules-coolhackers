@@ -67,6 +67,11 @@ Use only these seats and their literal handles. If the human configured differen
   stage and task id, then start. Send no other message whose only content is thanks,
   agreement or acknowledgement: every message wakes its recipient and costs a turn.
 - Put everything you have to say to a seat into one message rather than several.
+- Mention only the seats that must act on a message. Do not copy seats that have nothing to
+  do with it: every mention wakes that seat and costs it a turn.
+- If a message needs nothing from you, end the turn at once. Do not deliberate about it.
+- Decide and act with your tools. Keep your reasoning short: a turn spent only thinking,
+  with no tool call and no message sent, produces nothing and is lost.
 
 ## Handoffs
 
@@ -98,9 +103,14 @@ Everything you read stays in your context and is paid for again on every later s
 
 ## Waiting
 
-- A seat that has not replied is working, not absent. Wait at least 15 minutes before
-  asking again. Then resend the identical, complete handoff once; never a condensed one.
-- If there is still no reply 15 minutes after the resend, report a blocker to
+You have no timer: you act only when a message arrives. So check the clock whenever you are
+woken.
+
+- A seat that has not replied is working, not absent. Record the time (`date`) when you send
+  a handoff. Each time you are woken, compare the current time with your outstanding
+  handoffs.
+- A handoff with no reply after 15 minutes: resend the identical, complete handoff once;
+  never a condensed one. Still no reply 15 minutes after the resend: report a blocker to
   `@coordinator` with the times and message ids, and do other work meanwhile.
 - Never do another seat's work because it is slow or silent.
 
