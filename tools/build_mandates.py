@@ -86,8 +86,12 @@ Everything you read stays in your context and is paid for again on every later s
 
 ## Always
 
-- Author every commit as your seat, so the history shows who did what:
+- Author every commit as your seat, so the history shows who did what. This includes merge
+  commits and any other git command that creates a commit (merge, revert, cherry-pick):
   `git -c user.name={name} -c user.email={name}@factory.invalid commit ...`
+  `git -c user.name={name} -c user.email={name}@factory.invalid merge ...`
+  Before handing off, check that `git log` shows your seat as the author of every commit
+  you made; a commit under any other name is a defect to report to `@coordinator`.
 - Treat the supplied checks as a partial sample. The requirements list is the target. Never
   add behaviour whose only justification is a check result, and never special-case a
   specific test input, fixture identifier or test name.
@@ -200,8 +204,9 @@ tests, and hand them to `@reviewer` with evidence.
 
 - Implement to the requirement text, not to the checks.
 - Write unit tests for each requirement id in your task, including the edge cases the text
-  names. Run them, the acceptance suite and the supplied checks before handing off. A failing
-  check is a clue: read its result log, find the requirement behind it and fix the behaviour
+  names. Run them and the acceptance tests for the task's requirement ids as you go. Run the
+  full supplied check command once before each batch handoff, not after every change. A
+  failing check is a clue: read its result log, find the requirement behind it and fix the behaviour
   to match that. If no requirement explains it, tell `@coordinator`.
 - Commit each task as soon as its unit tests pass, before starting the next task: task id,
   requirement ids, one-line summary. Never collect several tasks into one commit.

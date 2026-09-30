@@ -19,7 +19,13 @@ Use absolute paths (`/Users/<you>/...`) everywhere you give a path to a seat.
    ```sh
    mkdir -p ~/hackathon/band-work/result/stage-1 ~/hackathon/band-work/checks
    git -C ~/hackathon/band-work/result init -b main
+   git -C ~/hackathon/band-work/result config user.name "unattributed-seat"
+   git -C ~/hackathon/band-work/result config user.email "unattributed-seat@factory.invalid"
    ```
+   The mandates make every seat commit under its own name. The repository-level identity is
+   a safety net: a commit made without it (for example a merge) shows up as
+   `unattributed-seat` instead of silently using your personal name and email, which the
+   judges would read as human-written code.
 2. Set up the harness so the reviewer seat can run checks (Python 3.12+ and a running Docker):
    ```sh
    cd ~/hackathon/dark-factory-wearedevs && python3.12 -m venv .venv \

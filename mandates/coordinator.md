@@ -122,8 +122,12 @@ Everything you read stays in your context and is paid for again on every later s
 
 ## Always
 
-- Author every commit as your seat, so the history shows who did what:
+- Author every commit as your seat, so the history shows who did what. This includes merge
+  commits and any other git command that creates a commit (merge, revert, cherry-pick):
   `git -c user.name=coordinator -c user.email=coordinator@factory.invalid commit ...`
+  `git -c user.name=coordinator -c user.email=coordinator@factory.invalid merge ...`
+  Before handing off, check that `git log` shows your seat as the author of every commit
+  you made; a commit under any other name is a defect to report to `@coordinator`.
 - Treat the supplied checks as a partial sample. The requirements list is the target. Never
   add behaviour whose only justification is a check result, and never special-case a
   specific test input, fixture identifier or test name.
