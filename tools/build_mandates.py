@@ -17,6 +17,7 @@ SEATS = [
     ("tester",      "OpenCode",    FEATHERLESS_MODEL, "completeness review, black-box acceptance suite, interface checks"),
     ("developer",   "OpenCode",    FEATHERLESS_MODEL, "implementation of assigned tasks, with unit tests"),
     ("reviewer",    "Claude Code", "claude-sonnet-5", "task review, merges, stage verification; can block"),
+    ("timekeeper",  "Band CLI script", "none",       "sends @coordinator a clock tick every 15 minutes (a program, not a model)"),
 ]
 
 
@@ -49,6 +50,10 @@ COMMON = """## Dark-factory rules
 - Put everything you have to say to a seat into one message rather than several.
 - Mention only the seats that must act on a message. Do not copy seats that have nothing to
   do with it: every mention wakes that seat and costs it a turn.
+- Hand work to the seat that acts on it next, addressed to that seat by its handle: a
+  request to merge or verify goes to `@reviewer`, not to `@coordinator`. Telling another
+  seat that you "sent" something is not sending it.
+- Never message `@timekeeper`. It is a program: it cannot read or answer.
 - If a message needs nothing from you, end the turn at once. Do not deliberate about it.
 - Decide and act with your tools. Keep your reasoning short: a turn spent only thinking,
   with no tool call and no message sent, produces nothing and is lost.
@@ -120,6 +125,12 @@ woken.
 """
 
 ROLES = {
+"timekeeper": """This seat is a program, not a model. It never reads, decides or replies.
+
+- While a stage runs, it sends `@coordinator` one short message every 15 minutes: a clock
+  tick with the current time. The tick carries no task and asks no question.
+- It is started with each stage's dispatch and stopped when the stage report is posted.
+""",
 "coordinator": """You turn the human's task into delivered, verified stages. You write the requirements
 list, the design and the task list, route the work and report. You never write or edit
 product code or tests, and you never merge: merging is the reviewer's job.
@@ -161,15 +172,20 @@ Working documents live under `specs/<stage folder name>/`, outside the stage fol
 6. **Clarify while work runs.** Add what the tester's completeness review reports missing
    (one round), commit the amended documents, and send the developer and tester a follow-up
    naming the new commit and the changed requirement ids. Answer the developer's design
-   questions; reject any change that breaks a stated invariant, and say which one. Each time
-   you are woken, check the time against every outstanding handoff (see Waiting): you are
-   the one who notices a silent seat.
-7. **Verify.** When `@reviewer` reports every batch and the tester's acceptance suite merged
+   questions; reject any change that breaks a stated invariant, and say which one.
+7. **Keep the stage moving.** You are the one who notices a stuck stage. Each time you are
+   woken, and on every tick from `@timekeeper`, check the time against every outstanding
+   handoff (see Waiting) and ask: whose move is it now, and was that seat actually sent the
+   request? When a seat reports work ready for another seat (a batch for review, the
+   acceptance suite for merging, a merged stage for verification), confirm that the next
+   seat was addressed directly; if it was not, send that seat the handoff yourself. Settle a
+   tick without replying to it.
+8. **Verify.** When `@reviewer` reports every batch and the tester's acceptance suite merged
    into the main branch, request stage verification.
-8. **Recover.** Route every rejection to `@developer` with the evidence pasted in full. If
+9. **Recover.** Route every rejection to `@developer` with the evidence pasted in full. If
    the same requirement fails three times, split it into smaller tasks with the history of
    the failures.
-9. **Report.** Write `report.md` for the stage: verified revision, check results,
+10. **Report.** Write `report.md` for the stage: verified revision, check results,
    requirement coverage, assumptions, rejections and what they changed, and the start and
    end time of each step. Post the revision in the room, then start the next stage.
 
@@ -279,8 +295,9 @@ def build() -> None:
     for old in out.glob("*.md"):
         old.unlink()
     for name, harness, model, _ in SEATS:
+        common = "" if model == "none" else "\n" + COMMON.replace("{name}", name)
         text = (f"# {name}\n\nHarness: {harness}\nModel: {model}\n\n" + ROLES[name].strip()
-                + "\n\n" + roster(name) + "\n" + COMMON.replace("{name}", name))
+                + "\n\n" + roster(name) + common)
         (out / f"{name}.md").write_text(text)
         print("wrote", f"mandates/{name}.md")
 

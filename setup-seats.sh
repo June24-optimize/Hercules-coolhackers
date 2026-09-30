@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Create the factory's four seats in Band as persistent agents, each live-linked to its
+# Create the factory's five seats (four model seats and the timekeeper program) in Band as persistent agents, each live-linked to its
 # mandate file (edit tools/build_mandates.py, rerun it, and the agents follow).
 #
 # Each seat's runtime comes from its mandate's Harness/Model lines:
@@ -47,6 +47,11 @@ create() {
                --claude-permission-mode "$PERMISSION_MODE" --claude-context-mode local_config) ;;
     "OpenCode")
       runtime=(--transport opencode --spawn-command "$LAUNCHER" --spawn-arg acp) ;;
+    "Band CLI script")
+      # A program seat: it only needs a Band identity to send from (tools/timekeeper.sh).
+      # It is never @mentioned, so its parked runtime never starts; OpenCode keeps it cheap.
+      runtime=(--transport opencode --spawn-command "$LAUNCHER" --spawn-arg acp)
+      model=$(sed -n 's/^Model: //p' "$FACTORY_DIR/mandates/developer.md" | head -1) ;;
     *) echo "$name: unsupported harness '$harness' in $mandate" >&2; exit 1 ;;
   esac
   echo "== $name ($harness, $model)"
@@ -65,5 +70,6 @@ create coordinator "Specifies and designs each stage, routes handoffs, keeps the
 create tester      "Completeness review and black-box acceptance tests, including user-interface checks."
 create developer   "Coding agent: implements assigned tasks with unit tests."
 create reviewer    "Independent review from a clean copy; merges; verifies stages; can block."
+create timekeeper  "Program seat: sends the coordinator a clock tick every 15 minutes during a stage."
 
-echo "Done. Next: create a room, add the four seats, and dispatch the task to @coordinator."
+echo "Done. Next: create a room, add all five seats, dispatch to @coordinator, start tools/timekeeper.sh."

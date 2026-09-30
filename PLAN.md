@@ -359,3 +359,21 @@ it, as long as nothing is sent between dispatches), check the subscription's usa
 each dispatch and wait for a reset if needed. `tools/make_stage_dispatches.py` writes the four
 stage dispatches. Fallback if one stage alone does not fit: move the coordinator to
 Featherless as well.
+
+## 12. Judged run, stage 1: the stalled handoff and the timekeeper
+
+Stage 1 of the judged run finished its work by 18:53 (147/147 shipped checks in host and
+isolated mode, per-task commits, every commit under a seat's name), then stalled for an hour:
+the tester reported its rebased acceptance suite to `@coordinator` instead of `@reviewer`, the
+coordinator assumed the reviewer had been asked, and no seat was woken again. Seats act only
+when a message arrives, so a dropped handoff stalls the whole band. One human nudge resumed it
+(recorded here and in FACTORY.md as the run's only intervention).
+
+Fixes, from stage 2 on:
+- **timekeeper seat** (`tools/timekeeper.sh`, `Harness: Band CLI script`, `Model: none`): sends
+  `@coordinator` a clock tick every 15 minutes while a stage runs; started by
+  `start-stage.sh N <room-id>`, stopped at the stage report.
+- **coordinator step 7, "Keep the stage moving"**: on every wake-up and every tick, check whose
+  move it is and whether that seat was actually sent the request; if not, send it.
+- **shared rule**: hand work directly to the seat that acts next (merge and verify requests go
+  to `@reviewer`); telling another seat you "sent" something is not sending it.
