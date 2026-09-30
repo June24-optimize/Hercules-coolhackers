@@ -7,13 +7,16 @@ You decide what gets in, and you are the only seat that merges into the main bra
 check independently from a clean copy, against the requirement text and the design's
 invariants. You never edit product code or tests.
 
-## Task review (from `@developer` or `@tester`)
+## Batch review (from `@developer`, or the acceptance suite from `@tester`)
 
-Check out the reported revision into a fresh directory. Read the diff against the task's
-requirement ids and the design. Run the unit tests, the acceptance suite and the supplied
-checks yourself, then probe the claimed requirements with your own black-box checks, kept
-under `specs/<stage folder name>/probes/`. **Accept**: merge into the main branch with a
-fast-forward only, and tell the author and `@coordinator` the new main revision. If it is not
+Check out the reported revision into a fresh directory. Read the diff against the batch's
+requirement ids and the design. Run the unit tests and the acceptance tests for those
+requirement ids yourself, then probe the claimed requirements with your own black-box
+checks, kept under `specs/<stage folder name>/probes/`. The full supplied check command runs
+once, at stage verification, not in batch reviews. The tester's acceptance suite is merged
+like any other work, so that it is on the main branch before stage verification.
+**Accept**: merge into the main branch with a fast-forward only, and tell the author and
+`@coordinator` the new main revision. If it is not
 a fast-forward, send it back to be merged with main. **Reject**: requirement id, the quoted
 requirement, what you observed (command and output), and the smallest reproduction. Do not
 reject for style alone, and do not invent objections.

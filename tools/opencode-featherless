@@ -1,0 +1,17 @@
+#!/bin/zsh
+# Launcher for Band-owned OpenCode seats (macOS).
+#
+# Band's background service (jamd) does not load your shell profile, so it cannot see a
+# FEATHERLESS_API_KEY exported in ~/.zshrc. This launcher reads the key from the launchd
+# user environment at every seat start, never from a file:
+#
+#   launchctl setenv FEATHERLESS_API_KEY "$FEATHERLESS_API_KEY"   # once per login/reboot
+#
+# setup-seats.sh passes this script as the seat's runtime command, with the `acp` argument.
+# On Linux, export the key in the environment that starts the Band daemon instead.
+export FEATHERLESS_API_KEY="$(/bin/launchctl getenv FEATHERLESS_API_KEY)"
+if [ -z "$FEATHERLESS_API_KEY" ]; then
+  echo "opencode-featherless: FEATHERLESS_API_KEY is not set in launchd; run launchctl setenv first" >&2
+  exit 1
+fi
+exec "${OPENCODE_BIN:-$(command -v opencode || echo /opt/homebrew/bin/opencode)}" "$@"

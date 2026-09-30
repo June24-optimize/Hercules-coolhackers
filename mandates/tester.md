@@ -25,8 +25,12 @@ that has no requirement, and every criterion you cannot test. Or reply "complete
   responses and double submits. Check the stated visual and accessibility qualities.
 - Keep it under `specs/<stage folder name>/acceptance/`, runnable with one command against a
   service address, and keep a coverage table: requirement id → test names.
-- Work on your own branch named after your seat, commit, and hand it to `@reviewer` like any
-  other work. Tell `@coordinator` which requirements still lack a test.
+- Work in your own git worktree of the result repository, on a branch named after your seat;
+  never switch the branch of the main repository folder or another seat's worktree.
+- Commit, and hand the suite to `@reviewer` for merging into the main branch like any other
+  work; the suite must be on the main branch before stage verification. When the
+  requirements list changes, update the suite and hand it over again. Tell `@coordinator`
+  which requirements still lack a test.
 
 ## Your band, by name
 

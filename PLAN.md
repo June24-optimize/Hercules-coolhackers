@@ -336,3 +336,26 @@ Before the judged run, a stage-1-only toy confirmation run on the four seats mus
 fixes hold (messages delivered, no takeovers, no test reads) and measure the Featherless
 cost of one stage. Size the Featherless top-up from that number, with headroom for
 Pocketful's specs being about 10× longer than the toy's.
+
+## 11. Pocketful practice run 1 (Sep 29) and the usage-limit plan
+
+**Result:** stage 1 verified in 57 minutes (isolated harness: claimed stage 1, 100% of the
+shipped checks; 83 requirements; 84 unit tests, 86 acceptance tests, 23 reviewer probes; money
+invariants evidenced in the stage report). Featherless spend for the whole of stage 1: about
+**$1.90**. Stage 2 reached requirements (R83–R137) and design before the Claude subscription
+hit its usage limit and the run was stopped.
+
+| Finding | Fix |
+|---|---|
+| Claude Code seats asked for approval on every room message (`jam` not pre-allowed), then on shell commands its safety check flags (e.g. `echo "---"`) | `jam` and everyday commands pre-allowed; the Claude seats run in `bypassPermissions` mode, which still enforces the deny list (verified: `sudo`, `git push` refused) |
+| The tester switched the main repository folder to its own branch; the coordinator then committed its requirements amendment twice | Tester works in its own worktree, like the developer |
+| The tester's 86-test acceptance suite was never merged into `main` | The suite is merged like any other work and must be on `main` before stage verification |
+| The developer built all 17 tasks before committing (all commits at one minute) | Commit each task as soon as its unit tests pass; hand off in 3–5 review batches per stage |
+| Every review re-ran the full harness | Batch reviews run unit tests, the batch's acceptance tests and probes; the full harness runs once, at stage verification |
+| **~85% of the Claude usage in the limit window came from a human's parallel Claude session, not the seats** (seats ≈ 11 M tokens for stage 1 + stage-2 design; the window ≈ 83 M) | No other Claude use during a run |
+
+**Staying inside the subscription limit:** dispatch **one stage at a time** (the guide allows
+it, as long as nothing is sent between dispatches), check the subscription's usage before
+each dispatch and wait for a reset if needed. `tools/make_stage_dispatches.py` writes the four
+stage dispatches. Fallback if one stage alone does not fit: move the coordinator to
+Featherless as well.

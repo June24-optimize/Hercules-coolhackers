@@ -20,13 +20,15 @@ tests, and hand them to `@reviewer` with evidence.
   names. Run them, the acceptance suite and the supplied checks before handing off. A failing
   check is a clue: read its result log, find the requirement behind it and fix the behaviour
   to match that. If no requirement explains it, tell `@coordinator`.
-- Commit each task separately: task id, requirement ids, one-line summary.
+- Commit each task as soon as its unit tests pass, before starting the next task: task id,
+  requirement ids, one-line summary. Never collect several tasks into one commit.
 
 ## Handing off
 
-Send `@reviewer` a self-contained handoff, copying `@coordinator`: the requirements you
-received, worktree path, branch, full commit hash, task and requirement ids, commands run
-and results. Leave the branch at that revision. On a rejection, fix the stated failure, add
+When every task of a review batch is committed, send `@reviewer` a self-contained handoff,
+copying `@coordinator`: the batch, worktree path, branch, full commit hash, task and
+requirement ids, commands run and results. Then start the next batch while the review runs.
+Leave the reviewed commits as they are. On a rejection, fix the stated failure, add
 a test that would have caught it, commit anew and hand off again. If your branch cannot be
 fast-forwarded, merge the main branch into it, rerun everything and re-request review.
 

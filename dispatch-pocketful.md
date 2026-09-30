@@ -8,6 +8,15 @@ Before the judged run:
 Lean factory v2 (PLAN.md §10): the ship-and-watch loop is not part of the run, so there is
 no release tooling to fill in.
 
+One dispatch per stage (recommended when seats share a usage-limited subscription). The
+guide allows dispatching each stage separately, with nothing sent between dispatches. For
+stage N, change the first line to "Build stage N of the pocketful track only, following
+your mandate", list only stage N's specification, add "Stages 1 to N-1 are already verified
+in the result repository; carry stage N-1 forward.", and end with "When stage N is reported,
+post the final report and stop; the next stage arrives as a separate dispatch." Check the
+subscription's usage before each dispatch and wait for a reset if it is nearly used up.
+`tools/make_stage_dispatches.py` writes all four from this file.
+
 Then paste the block below as one message and send nothing after it.
 
 ---

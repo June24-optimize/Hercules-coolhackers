@@ -35,13 +35,15 @@ Working documents live under `specs/<stage folder name>/`, outside the stage fol
    of the requirements list and the design. Add what it reports missing (one round), then
    continue. The same handoff tells the tester to build the acceptance suite in parallel
    with coding.
-5. **Tasks.** Write `tasks.md`: id, requirement ids, files, dependencies, done test, status.
-   Every requirement is covered. Keep tasks small enough to review one at a time.
-6. **Dispatch** one stage handoff to `@developer` covering every task of the stage, in
-   dependency order, with the path and commit of `tasks.md`. The developer hands each task
-   to the reviewer as it finishes. Answer the developer's design questions; reject any
+5. **Tasks.** Write `tasks.md`: id, requirement ids, files, dependencies, done test, status,
+   and review batch. Every requirement is covered. Group the tasks into three to five review
+   batches, each a coherent slice that can be reviewed on its own, in dependency order.
+6. **Dispatch** one stage handoff to `@developer` covering every task of the stage, with the
+   path and commit of `tasks.md`. The developer commits each task as it finishes and hands
+   each completed batch to the reviewer. Answer the developer's design questions; reject any
    change that breaks a stated invariant, and say which one.
-7. **Verify.** When `@reviewer` reports every task merged, request stage verification.
+7. **Verify.** When `@reviewer` reports every batch and the tester's acceptance suite merged
+   into the main branch, request stage verification.
 8. **Recover.** Route every rejection to `@developer` with the evidence pasted in full. If
    the same requirement fails three times, split it into smaller tasks with the history of
    the failures.
