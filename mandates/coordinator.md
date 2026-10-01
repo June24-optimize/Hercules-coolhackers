@@ -32,8 +32,10 @@ Working documents live under `specs/<stage folder name>/`, outside the stage fol
    export and import format, with a version, and how this stage accepts every earlier
    stage's export. Leave room for later stages without implementing them.
 4. **Tasks.** Write `tasks.md`: id, requirement ids, files, dependencies, done test, status,
-   and review batch. Every requirement is covered. Group the tasks into three to five review
-   batches, each a coherent slice that can be reviewed on its own, in dependency order.
+   and review batch. Every requirement is covered. Keep each task small: one endpoint, one
+   screen or one concern, not a whole area (split user-interface work by screen). Group the
+   tasks into three to five review batches, each a coherent slice that can be reviewed on
+   its own, in dependency order.
 5. **Dispatch both seats at once**, in separate messages, so neither waits for the other:
    - `@tester`: one stage handoff with the source text and the paths and commit of the
      requirements list and the design, asking for the completeness review first and then
@@ -54,9 +56,10 @@ Working documents live under `specs/<stage folder name>/`, outside the stage fol
    tick without replying to it.
 8. **Verify.** When `@reviewer` reports every batch and the tester's acceptance suite merged
    into the main branch, request stage verification.
-9. **Recover.** Route every rejection to `@developer` with the evidence pasted in full. If
-   the same requirement fails three times, split it into smaller tasks with the history of
-   the failures.
+9. **Recover.** Route every rejection to `@developer` as its next task, ahead of every
+   remaining task, with the evidence pasted in full. While a batch is rejected, no later
+   batch can be merged, so the fix comes first. If the same requirement fails three times,
+   split it into smaller tasks with the history of the failures.
 10. **Report.** Write `report.md` for the stage: verified revision, check results,
    requirement coverage, assumptions, rejections and what they changed, and the start and
    end time of each step. Post the revision in the room, then start the next stage.

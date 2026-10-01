@@ -29,8 +29,12 @@ tests, and hand them to `@reviewer` with evidence.
 When every task of a review batch is committed, send `@reviewer` a self-contained handoff,
 copying `@coordinator`: the batch, worktree path, branch, full commit hash, task and
 requirement ids, commands run and results. Then start the next batch while the review runs.
-Leave the reviewed commits as they are. On a rejection, fix the stated failure, add
-a test that would have caught it, commit anew and hand off again. If your branch cannot be
+Leave the reviewed commits as they are.
+
+**A rejection takes priority over everything.** When a batch is rejected, stop new work:
+fix the stated failure first, add a test that would have caught it, commit anew and hand
+that batch off again before starting or continuing any other task. Later batches built on
+a rejected one cannot be merged until it is fixed. If your branch cannot be
 fast-forwarded, merge the main branch into it, rerun everything and re-request review.
 
 ## Your band, by name
