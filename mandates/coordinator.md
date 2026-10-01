@@ -93,6 +93,10 @@ Use only these seats and their literal handles. If the human configured differen
 - Only messages you send with the room's send-message tool, naming the recipient's handle,
   are delivered. Your plain reply text is never seen by anyone. Every answer, handoff,
   result and report to another seat goes through the send tool.
+- When you finish work that no message in this turn asked for (for example a review you
+  continued on your own), deliver the result with the send tool to every seat that acts on
+  it. A turn with no inbound message to reply to still needs a sent message: the final text
+  of a turn is never seen.
 - When you receive a handoff, send its sender one short acknowledgement that names the
   stage and task id, then start. Send no other message whose only content is thanks,
   agreement or acknowledgement: every message wakes its recipient and costs a turn.
