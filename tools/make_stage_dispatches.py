@@ -4,7 +4,8 @@
         --kickoff ~/hackathon/dark-factory-wearedevs --result ~/hackathon/band-work/result \
         --out ~/hackathon/band-work [--work ~/hackathon/band-work]
 
-Writes dispatch-pocketful-stage-N.local.md (N = 1..4) into --out. Paste one per stage into
+Writes dispatch-pocketful-all.local.md (all four stages, one dispatch) and
+dispatch-pocketful-stage-N.local.md (N = 1..4) into --out. Paste one per stage into
 the room, addressed to @coordinator, and send nothing else until that stage's report.
 """
 import argparse
@@ -32,6 +33,11 @@ def main() -> None:
                 .replace("/Users/wanyubian/hackathon", ws)
                 .replace("WORKDIR", work)
                 .replace("RESULT", res))
+
+    assert "wanyubian" not in body and "RESULT" not in body and "WORKDIR" not in body
+    dest = pathlib.Path(out) / "dispatch-pocketful-all.local.md"
+    dest.write_text(body)
+    print("wrote", dest, "(all four stages, one dispatch)")
 
     for n in range(1, 5):
         text = body

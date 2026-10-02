@@ -2,7 +2,9 @@
 # Start one stage of a judged run: checks everything, creates missing seats (stage 1 only),
 # starts the timekeeper ticker and copies that stage's dispatch to the clipboard.
 #   tools/start-stage.sh 1 [room-id]   stage 1: creates the seats if missing
-#   tools/start-stage.sh N <room-id>   later stages: same room, seats must already exist
+#   tools/start-stage.sh N <room-id>   later stages: seats must already exist
+#   tools/start-stage.sh all [room-id] one dispatch for all four stages; the coordinator opens a
+#                                      fresh room per stage and the timekeeper follows it
 # Paths (override with env vars; defaults assume the layout in docs/setup-notes.md):
 #   WORKDIR   band-work folder: seats' cwd, result/ repo and the generated dispatches
 #   KICKOFF   the hackathon kickoff package (specs + harness)
@@ -11,7 +13,7 @@
 # Generate the per-stage dispatches first with tools/make_stage_dispatches.py.
 # macOS only as written (launchctl, pbcopy).
 set -euo pipefail
-N=${1:?usage: tools/start-stage.sh <stage 1-4> [room-id]}
+N=${1:?usage: tools/start-stage.sh <stage 1-4 | all> [room-id]}
 ROOM=${2:-}
 R="$(cd "$(dirname "$0")/.." && pwd)"                 # this team repo
 W=${WORKDIR:-$HOME/hackathon/band-work}
@@ -21,7 +23,7 @@ CLAUDE=${CLAUDE:-$(command -v claude || echo claude)}
 [ -d "$W" ] || { echo "WORKDIR $W does not exist (set WORKDIR=...)"; exit 1; }
 [ -d "$K" ] || { echo "KICKOFF $K does not exist (set KICKOFF=...)"; exit 1; }
 [ -d "$RES/.git" ] || { echo "RESULT $RES is not a git repository (set RESULT=...)"; exit 1; }
-DISPATCH="$W/dispatch-pocketful-stage-$N.local.md"
+if [ "$N" = all ]; then DISPATCH="$W/dispatch-pocketful-all.local.md"; else DISPATCH="$W/dispatch-pocketful-stage-$N.local.md"; fi
 ok()   { echo "  ok   $*"; }
 fail() { echo "  FAIL $*"; exit 1; }
 
@@ -37,7 +39,7 @@ docker info >/dev/null 2>&1 || fail "Docker is not running"; ok "Docker running"
   || fail "team repo has uncommitted mandate/tool changes: commit them first"; ok "team repo committed"
 [ "$(git -C "$RES" config user.name)" = "unattributed-seat" ] || fail "result repo lacks the neutral git identity"
 ok "result repo identity"
-if [ "$N" = 1 ]; then
+if [ "$N" = 1 ] || [ "$N" = all ]; then
   [ -z "$(git -C "$RES" rev-list --all 2>/dev/null)" ] || fail "result repo already has commits: stage 1 needs a fresh repo"
   ok "result repo is fresh"
 fi
@@ -46,7 +48,7 @@ echo "== Seats"
 missing=0
 for s in coordinator tester developer reviewer; do band list | grep -q "/$s \[" || missing=1; done
 if [ "$missing" = 1 ]; then
-  [ "$N" = 1 ] || fail "seats are missing mid-run: recreating them now would lose the room's context"
+  { [ "$N" = 1 ] || [ "$N" = all ]; } || fail "seats are missing mid-run: recreating them now would lose the room's context"
   echo "  creating the four seats (Claude seats in bypassPermissions; the deny list still applies)"
   ( cd "$R" && PERMISSION_MODE=bypassPermissions WORKDIR="$W" ./setup-seats.sh ) | grep -E '^==|created|error'
 fi
@@ -72,7 +74,8 @@ ok "all five seats connected (four model seats + timekeeper)"
 # Timekeeper: one background ticker per run
 pkill -f "tools/timekeeper.sh" 2>/dev/null || true
 if [ -n "$ROOM" ]; then
-  nohup "$R/tools/timekeeper.sh" "$ROOM" > "$W/timekeeper.log" 2>&1 &
+  { [ "$N" = 1 ] || [ "$N" = all ]; } && rm -f "$W/current-room"   # a fresh run starts in the room given here
+  WORKDIR="$W" nohup "$R/tools/timekeeper.sh" "$ROOM" > "$W/timekeeper.log" 2>&1 &
   ok "timekeeper ticking @coordinator every 15 min in room $ROOM (pid $!, log $W/timekeeper.log)"
 else
   hint=$(band activity list --limit 5 2>/dev/null | head -1 | awk '{print $5}')

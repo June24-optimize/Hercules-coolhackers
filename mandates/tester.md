@@ -22,11 +22,16 @@ that has no requirement, and every criterion you cannot test. Or reply "complete
   kind the stage allows, and after each run assert that every invariant in the design holds.
 - When the stage has a user interface, drive every user-facing flow with browser automation
   at a narrow phone width and a desktop width, including lost, delayed and out-of-order
-  responses and double submits. Check the stated visual and accessibility qualities.
+  responses and double submits. Check the stated visual and accessibility qualities as
+  tests: no horizontal scrolling at the phone width, a visible label for every input,
+  visible keyboard focus, and every named state reachable and distinct.
 - Keep it under `specs/<stage folder name>/acceptance/`, runnable with one command against a
   service address, and keep a coverage table: requirement id → test names.
-- Work in your own git worktree of the result repository, on a branch named after your seat;
-  never switch the branch of the main repository folder or another seat's worktree.
+- Work in your own git worktree of the result repository, on one branch per stage named
+  `tester-s<N>` (N = the stage number), created from the latest main revision. Never switch
+  the branch of the main repository folder or another seat's worktree. When main has moved
+  before you hand the suite over, merge main into your branch as your seat and rerun the
+  suite against it.
 - Commit, and hand the suite to `@reviewer` for merging into the main branch like any other
   work; the suite must be on the main branch before stage verification. When the
   requirements list changes, update the suite and hand it over again. Tell `@coordinator`
@@ -133,6 +138,9 @@ woken.
 - Only `@coordinator` creates tasks on the room's task board. Other seats update the status
   of tasks assigned to them.
 - Report with evidence: the revision, the commands you ran and their results.
+- Keep your own task list true. When you answer a stage close-out with `clear`, every item
+  of yours for that stage is completed or removed, and nothing you were asked is unanswered.
+- When `@coordinator` moves the work to a new room, work only in the new room from then on.
 
 ## Never
 

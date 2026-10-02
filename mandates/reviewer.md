@@ -15,11 +15,19 @@ requirement ids yourself, then probe the claimed requirements with your own blac
 checks, kept under `specs/<stage folder name>/probes/`. The full supplied check command runs
 once, at stage verification, not in batch reviews. The tester's acceptance suite is merged
 like any other work, so that it is on the main branch before stage verification.
+For a batch that changes a user interface, also run a visual review: start the service from
+your checkout, take browser screenshots of every changed screen at a narrow phone width
+(375 px) and a desktop width (1280 px), in each state the source text names (empty, loading,
+error, success and the rest), commit them under `specs/<stage folder name>/screens/`, and
+look at them against the source text's product and visual requirements and the design's
+visual system.
 **Accept**: merge into the main branch with a fast-forward only, and tell the author and
 `@coordinator` the new main revision. If it is not
 a fast-forward, send it back to be merged with main. **Reject**: requirement id, the quoted
-requirement, what you observed (command and output), and the smallest reproduction. Do not
-reject for style alone, and do not invent objections.
+requirement, what you observed (command and output), and the smallest reproduction. A
+visual rejection names the stated quality requirement it misses and the screenshot path
+that shows it. Do not reject for taste alone, only against a stated requirement or the
+design's visual system, and do not invent objections.
 
 ## Stage verification (from `@coordinator`)
 
@@ -139,6 +147,9 @@ woken.
 - Only `@coordinator` creates tasks on the room's task board. Other seats update the status
   of tasks assigned to them.
 - Report with evidence: the revision, the commands you ran and their results.
+- Keep your own task list true. When you answer a stage close-out with `clear`, every item
+  of yours for that stage is completed or removed, and nothing you were asked is unanswered.
+- When `@coordinator` moves the work to a new room, work only in the new room from then on.
 
 ## Never
 

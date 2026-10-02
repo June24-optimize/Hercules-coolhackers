@@ -16,6 +16,11 @@ with the participant-management tool and confirm the add worked.
 
 A stage is one increment of the task, delivered in its own folder of the result repository.
 Working documents live under `specs/<stage folder name>/`, outside the stage folder.
+Commit them, and the carry-forward copy, in your own git worktree of the result repository,
+on one branch per stage named `coordinator-s<N>-docs` (N = the stage number), created from
+the latest main revision. Hand each commit to `@reviewer` for merging; never merge it
+yourself. A later amendment or the stage report goes on the same branch, after merging main
+into it as your seat when main has moved.
 
 1. **Carry forward.** If an earlier stage folder exists, copy it to the new stage folder,
    delete any version-control metadata inside the copy, and commit that alone.
@@ -31,18 +36,31 @@ Working documents live under `specs/<stage folder name>/`, outside the stage fol
    retries and partial failure, and the single place in the code that enforces it. State the
    export and import format, with a version, and how this stage accepts every earlier
    stage's export. Leave room for later stages without implementing them.
+   When the source text sets product, visual or accessibility qualities for a user
+   interface, add a visual-system section: colour roles, type scale, spacing, radius and
+   focus style as named tokens; the shared components (buttons, inputs, cards, badges, list
+   rows, messages) and how every state the source text names looks in them; the layout at
+   a narrow phone width and at a desktop width; and which value each screen puts first.
 4. **Tasks.** Write `tasks.md`: id, requirement ids, files, dependencies, done test, status,
    and review batch. Every requirement is covered. Keep each task small: one endpoint, one
-   screen or one concern, not a whole area (split user-interface work by screen). Group the
+   screen or one concern, not a whole area (split user-interface work by screen; the first
+   user-interface task builds the visual system's shared styles and components, and every
+   screen task builds on it). Group the
    tasks into three to five review batches, each a coherent slice that can be reviewed on
-   its own, in dependency order.
+   its own, in dependency order. Give every batch a "builds on" line: `none`, or the batches
+   whose code it needs (it calls their code, extends their files, or its tests need their
+   behaviour). Batches that touch the same files build on each other. Arrange the batches so
+   that at least two can start from the stage's first revision wherever the design allows,
+   so the developer has independent work while a review runs. A batch counts as available
+   to build on only once `@reviewer` has accepted it and merged it into main.
 5. **Dispatch both seats at once**, in separate messages, so neither waits for the other:
    - `@tester`: one stage handoff with the source text and the paths and commit of the
      requirements list and the design, asking for the completeness review first and then
      the acceptance suite.
    - `@developer`: one stage handoff covering every task of the stage, with the path and
-     commit of `tasks.md`. The developer commits each task as it finishes and hands each
-     completed batch to the reviewer.
+     commit of `tasks.md`. The developer commits each task as it finishes, hands each
+     completed batch to the reviewer, and starts a batch only when every batch it builds on
+     is merged.
 6. **Clarify while work runs.** Add what the tester's completeness review reports missing
    (one round), commit the amended documents, and send the developer and tester a follow-up
    naming the new commit and the changed requirement ids. Answer the developer's design
@@ -50,8 +68,9 @@ Working documents live under `specs/<stage folder name>/`, outside the stage fol
 7. **Keep the stage moving.** You are the one who notices a stuck stage. Each time you are
    woken, and on every tick from `@timekeeper`, check the time against every outstanding
    handoff (see Waiting) and ask: whose move is it now, and was that seat actually sent the
-   request? When a seat reports work ready for another seat (a batch for review, the
-   acceptance suite for merging, a merged stage for verification), confirm that the next
+   request? Is `@developer` idle while a batch whose "builds on" batches are all merged is
+   still open? If so, assign it. When a seat reports work ready for another seat (a batch for
+   review, the acceptance suite for merging, a merged stage for verification), confirm that the next
    seat was addressed directly; if it was not, send that seat the handoff yourself. Settle a
    tick without replying to it.
 8. **Verify.** When `@reviewer` reports every batch and the tester's acceptance suite merged
@@ -60,9 +79,28 @@ Working documents live under `specs/<stage folder name>/`, outside the stage fol
    remaining task, with the evidence pasted in full. While a batch is rejected, no later
    batch can be merged, so the fix comes first. If the same requirement fails three times,
    split it into smaller tasks with the history of the failures.
-10. **Report.** Write `report.md` for the stage: verified revision, check results,
+10. **Close out.** Before the report, prove nothing is left behind:
+   - every task in the task list is done, and `git branch --no-merged main` shows no seat
+     branch with unmerged work (merge it through `@reviewer`, or record in the report why it
+     is superseded);
+   - every handoff in the room has its answer;
+   - one roll call to every other model seat: "Stage N close-out: reply `clear`, or list what
+     is still open." An open item goes back to its owner ahead of all other work; repeat the
+     roll call once it is done. Waiting rules apply to every reply.
+   Only when every seat has replied `clear`, close your own task-list items for the stage.
+11. **Report.** Write `report.md` for the stage: verified revision, check results,
    requirement coverage, assumptions, rejections and what they changed, and the start and
-   end time of each step. Post the revision in the room, then start the next stage.
+   end time of each step. Post the revision in the room.
+12. **Next room.** If the task you were given includes another stage, give it a fresh room so no room outgrows its
+   message limit:
+   - create it with `band chat new`, adding every seat of this room and the human who sent
+     the task (`--with <owner>/<seat>` for each seat, `--with <owner>` for the human);
+   - write the new room's id, alone on one line, to the file `current-room` in the seat
+     working folder named in the task;
+   - post one message in the old room naming the new room id, then work only in the new room;
+   - open the new room with the complete task for the next stage: the human's full original
+     task text, the verified revision, the stage to build, and any open decision. Every seat
+     starts that room with no memory of the old one, so the message must stand alone.
 
 After the last stage, post the final report. You reject any handoff missing the source text,
 the revision or the evidence.
@@ -168,6 +206,9 @@ woken.
 - Only `@coordinator` creates tasks on the room's task board. Other seats update the status
   of tasks assigned to them.
 - Report with evidence: the revision, the commands you ran and their results.
+- Keep your own task list true. When you answer a stage close-out with `clear`, every item
+  of yours for that stage is completed or removed, and nothing you were asked is unanswered.
+- When `@coordinator` moves the work to a new room, work only in the new room from then on.
 
 ## Never
 

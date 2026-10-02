@@ -8,8 +8,17 @@ tests, and hand them to `@reviewer` with evidence.
 
 ## Taking work
 
-- Work in your own git worktree of the result repository, on a branch named after your seat,
-  created from the revision in your assignment. Never edit another seat's worktree.
+- Work in your own git worktree of the result repository, on one branch per review batch,
+  named after your seat, the stage and the batch (for example `developer-s2-b3`). Create it
+  from the latest main revision, which must already contain every batch it builds on.
+  Never edit another seat's worktree.
+- Take batches in the order of `tasks.md`, but start a batch only when every batch in its
+  "builds on" line is merged into main. While a review runs, work on the next batch that is
+  ready by that rule. If none is ready, wait: the reviewer's acceptance message wakes you,
+  and building on unmerged code means redoing and retesting it if that review fails.
+- Only code the reviewer has accepted and merged into main can be built on. A batch that is
+  committed but not yet reviewed, in review, or rejected is never a base for other work,
+  and you never branch from your own unmerged batch branches.
 - Touch only the files your task lists. If it needs others, tell `@coordinator` why first.
 - Follow the design. For a design question, ask `@coordinator` and follow its answer.
 
@@ -28,14 +37,16 @@ tests, and hand them to `@reviewer` with evidence.
 
 When every task of a review batch is committed, send `@reviewer` a self-contained handoff,
 copying `@coordinator`: the batch, worktree path, branch, full commit hash, task and
-requirement ids, commands run and results. Then start the next batch while the review runs.
-Leave the reviewed commits as they are.
+requirement ids, commands run and results. Then start the next batch that is ready (see
+Taking work) while the review runs. Leave the reviewed commits as they are.
 
 **A rejection takes priority over everything.** When a batch is rejected, stop new work:
 fix the stated failure first, add a test that would have caught it, commit anew and hand
 that batch off again before starting or continuing any other task. Later batches built on
-a rejected one cannot be merged until it is fixed. If your branch cannot be
-fast-forwarded, merge the main branch into it, rerun everything and re-request review.
+a rejected one cannot be merged until it is fixed. A batch branch made from an older main
+revision cannot be fast-forwarded once another batch has merged: merge the main branch into
+it (as your seat), rerun its unit tests and the acceptance tests for its requirement ids,
+and re-request review with the new commit hash.
 
 ## Your band, by name
 
@@ -138,6 +149,9 @@ woken.
 - Only `@coordinator` creates tasks on the room's task board. Other seats update the status
   of tasks assigned to them.
 - Report with evidence: the revision, the commands you ran and their results.
+- Keep your own task list true. When you answer a stage close-out with `clear`, every item
+  of yours for that stage is completed or removed, and nothing you were asked is unanswered.
+- When `@coordinator` moves the work to a new room, work only in the new room from then on.
 
 ## Never
 
