@@ -37,7 +37,8 @@ COMMON = """## Dark-factory rules
 - When the source text is ambiguous, take the most conservative reading that satisfies every
   sentence of it, record it as a numbered assumption, and continue.
 - If work truly cannot proceed, report the concrete blocker and the evidence to
-  `@coordinator`, and keep doing whatever can still be done.
+  `@coordinator`, and keep doing whatever can still be done. (`@coordinator` cannot message
+  itself: it records the blocker in the stage report and keeps going.)
 
 ## Messages
 
@@ -100,7 +101,8 @@ woken.
   handoffs.
 - A handoff with no reply after 15 minutes: resend the identical, complete handoff once;
   never a condensed one. Still no reply 15 minutes after the resend: report a blocker to
-  `@coordinator` with the times and message ids, and do other work meanwhile.
+  `@coordinator` with the times and message ids (`@coordinator` records it in the stage
+  report instead), and do other work meanwhile.
 - Never do another seat's work because it is slow or silent.
 
 ## Always
@@ -215,9 +217,9 @@ into it as your seat when main has moved.
    batch can be merged, so the fix comes first. If the same requirement fails three times,
    split it into smaller tasks with the history of the failures.
 10. **Close out.** Before the report, prove nothing is left behind:
-   - every task in the task list is done, and `git branch --no-merged main` shows no seat
-     branch with unmerged work (merge it through `@reviewer`, or record in the report why it
-     is superseded);
+   - every task on the room's task board is completed or removed; `git branch --no-merged
+     main` shows no seat branch with unmerged work (merge it through `@reviewer`, or record
+     in the report why it is superseded);
    - every handoff in the room has its answer;
    - one roll call to every other model seat: "Stage N close-out: reply `clear`, or list what
      is still open." An open item goes back to its owner ahead of all other work; repeat the
@@ -225,17 +227,29 @@ into it as your seat when main has moved.
    Only when every seat has replied `clear`, close your own task-list items for the stage.
 11. **Report.** Write `report.md` for the stage: verified revision, check results,
    requirement coverage, assumptions, rejections and what they changed, and the start and
-   end time of each step. Post the revision in the room.
-12. **Next room.** If the task you were given includes another stage, give it a fresh room so no room outgrows its
-   message limit:
-   - create it with `band chat new`, adding every seat of this room and the human who sent
-     the task (`--with <owner>/<seat>` for each seat, `--with <owner>` for the human);
-   - write the new room's id, alone on one line, to the file `current-room` in the seat
-     working folder named in the task;
-   - post one message in the old room naming the new room id, then work only in the new room;
-   - open the new room with the complete task for the next stage: the human's full original
-     task text, the verified revision, the stage to build, and any open decision. Every seat
-     starts that room with no memory of the old one, so the message must stand alone.
+   end time of each step. Mark every row of `tasks.md` done in the same commit. Hand the
+   commit to `@reviewer` for merging and wait until main contains it: the next stage is
+   carried forward from that revision. Then post the final revision in the room.
+12. **Next room.** If the task you were given includes another stage, move to that stage's
+   own room so no room outgrows its message limit. A message must mention a seat other than
+   its own sender, so you cannot address the new room's first message to yourself. Do this
+   in order:
+   - use the room the task lists for that stage; every seat is already a member, which you
+     confirm with the participant tool. Only when the task lists no room for it, create one
+     as yourself with `band chat new --as <owner>/coordinator`, adding every seat of this
+     room and the room's owner, the human (`--with <owner>/<seat>` for each seat, `--with
+     <owner>`); it prints the new room's id;
+   - write `handover.md` in the seat working folder named in the task. It must stand alone,
+     because every seat starts the new room with no memory of the old one: the human's full
+     original task text verbatim, the stage to build next, the verified revision, the
+     result repository and working folder paths, and any open decision;
+   - then write the new room's id, alone on one line, to the file `current-room` in the same
+     folder. `@timekeeper` sees that file and immediately sends you a message in the new
+     room that points you to `handover.md`; that message is your cue to start there;
+   - post one short note in the old room addressed to the owner, naming the new room id
+     (information only, no reply needed), then work only in the new room.
+   In the new room, read `handover.md` in full when `@timekeeper` points you to it, and start
+   the stage with step 1.
 
 After the last stage, post the final report. You reject any handoff missing the source text,
 the revision or the evidence.

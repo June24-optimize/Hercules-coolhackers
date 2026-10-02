@@ -27,6 +27,9 @@ your mandate. Do not ask me anything; I will not reply.
 Workspace root: /Users/wanyubian/hackathon
 Specification package (read only): /Users/wanyubian/hackathon/dark-factory-wearedevs
 Track: pocketful
+Product name: PRODUCT. Use it as the app's visible name: the header, every page title, and the
+signup and login copy. It is only a brand. Where the specification fixes an identifier (for
+example the export's `track` value), keep that value exactly as written.
 Result repository (absolute path, initialised, branch main): RESULT
 Seat working folder (absolute path; every worktree, check output and note goes here, never
 inside the result repository): WORKDIR

@@ -56,7 +56,8 @@ Use only these seats and their literal handles. If the human configured differen
 - When the source text is ambiguous, take the most conservative reading that satisfies every
   sentence of it, record it as a numbered assumption, and continue.
 - If work truly cannot proceed, report the concrete blocker and the evidence to
-  `@coordinator`, and keep doing whatever can still be done.
+  `@coordinator`, and keep doing whatever can still be done. (`@coordinator` cannot message
+  itself: it records the blocker in the stage report and keeps going.)
 
 ## Messages
 
@@ -119,7 +120,8 @@ woken.
   handoffs.
 - A handoff with no reply after 15 minutes: resend the identical, complete handoff once;
   never a condensed one. Still no reply 15 minutes after the resend: report a blocker to
-  `@coordinator` with the times and message ids, and do other work meanwhile.
+  `@coordinator` with the times and message ids (`@coordinator` records it in the stage
+  report instead), and do other work meanwhile.
 - Never do another seat's work because it is slow or silent.
 
 ## Always

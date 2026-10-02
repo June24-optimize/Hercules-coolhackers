@@ -8,6 +8,8 @@
 # Paths (override with env vars; defaults assume the layout in docs/setup-notes.md):
 #   WORKDIR   band-work folder: seats' cwd, result/ repo and the generated dispatches
 #   KICKOFF   the hackathon kickoff package (specs + harness)
+#   STAGE_ROOMS  optional, "all" mode: the ids of the pre-made rooms for stages 2-4, space-separated;
+#             each must already contain all five seats
 #   RESULT    the result repository the seats commit to (default: $WORKDIR/result)
 #   BAND_OWNER your Band handle (the part before /coordinator); auto-detected by tools/timekeeper.sh
 # Generate the per-stage dispatches first with tools/make_stage_dispatches.py.
@@ -70,12 +72,21 @@ for s in coordinator tester developer reviewer timekeeper; do
   fail "$s not connected"
 done
 ok "all five seats connected (four model seats + timekeeper)"
+if [ "$N" = all ] && [ -n "${STAGE_ROOMS:-}" ]; then
+  for r in $ROOM $STAGE_ROOMS; do
+    members=$(band room participants "$r" 2>/dev/null) || fail "room $r not found"
+    for s in coordinator tester developer reviewer timekeeper; do
+      echo "$members" | grep -q "/$s " || fail "room $r is missing seat $s: add it in Band Desktop"
+    done
+  done
+  ok "stage rooms contain all five seats"
+fi
 
 # Timekeeper: one background ticker per run
 pkill -f "tools/timekeeper.sh" 2>/dev/null || true
 if [ -n "$ROOM" ]; then
   { [ "$N" = 1 ] || [ "$N" = all ]; } && rm -f "$W/current-room"   # a fresh run starts in the room given here
-  WORKDIR="$W" nohup "$R/tools/timekeeper.sh" "$ROOM" > "$W/timekeeper.log" 2>&1 &
+  rm -f "$W/handover.md"; WORKDIR="$W" nohup "$R/tools/timekeeper.sh" "$ROOM" > "$W/timekeeper.log" 2>&1 &
   ok "timekeeper ticking @coordinator every 15 min in room $ROOM (pid $!, log $W/timekeeper.log)"
 else
   hint=$(band activity list --limit 5 2>/dev/null | head -1 | awk '{print $5}')
