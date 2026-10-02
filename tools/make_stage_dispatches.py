@@ -2,7 +2,7 @@
 
     python3 tools/make_stage_dispatches.py --workspace ~/hackathon \
         --kickoff ~/hackathon/dark-factory-wearedevs --result ~/hackathon/band-work/result \
-        --out ~/hackathon/band-work
+        --out ~/hackathon/band-work [--work ~/hackathon/band-work]
 
 Writes dispatch-pocketful-stage-N.local.md (N = 1..4) into --out. Paste one per stage into
 the room, addressed to @coordinator, and send nothing else until that stage's report.
@@ -20,13 +20,17 @@ def main() -> None:
     ap.add_argument("--kickoff", required=True)
     ap.add_argument("--result", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--work", help="seats' working folder for worktrees, checks and notes "
+                    "(default: the result repository's parent folder)")
     a = ap.parse_args()
     ws, kick, res, out = (str(pathlib.Path(p).expanduser()) for p in (a.workspace, a.kickoff, a.result, a.out))
+    work = str(pathlib.Path(a.work).expanduser()) if a.work else str(pathlib.Path(res).parent)
 
     body = TEMPLATE.read_text().split("\n---\n", 1)[1].lstrip("\n")
     body = (body.replace("/Users/wanyubian/hackathon/dark-factory-wearedevs", kick)
-                .replace("/Users/wanyubian/hackathon/band-work/checks", str(pathlib.Path(res).parent / "checks"))
+                .replace("/Users/wanyubian/hackathon/band-work/checks", str(pathlib.Path(work) / "checks"))
                 .replace("/Users/wanyubian/hackathon", ws)
+                .replace("WORKDIR", work)
                 .replace("RESULT", res))
 
     for n in range(1, 5):
@@ -44,7 +48,7 @@ def main() -> None:
                       f"report for stage {n} in the room: verified revision, last isolated check result, invariant\n"
                       f"evidence, open gaps and the time the stage took. Then stop; the next stage arrives as a\n"
                       f"separate dispatch.\n", text, flags=re.S)
-        assert "wanyubian" not in text and "RESULT" not in text, n
+        assert "wanyubian" not in text and "RESULT" not in text and "WORKDIR" not in text, n
         dest = pathlib.Path(out) / f"dispatch-pocketful-stage-{n}.local.md"
         dest.write_text(text)
         print("wrote", dest)

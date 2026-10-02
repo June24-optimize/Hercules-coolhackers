@@ -56,15 +56,21 @@ Use absolute paths (`/Users/<you>/...`) everywhere you give a path to a seat.
 
 - **One dispatch for all four stages** (recommended for the final run): one message, then nothing
   until the end, so there's no risk of accidental steering.
-- **One dispatch per stage:** four messages and nothing in between. A "looks good, continue"
-  counts as steering, and dispatching a stage twice counts as a rerun.
+- **One dispatch per stage:** four messages and nothing in between. Use `tools/start-stage.sh N <room-id>`
+  for each one. A room holds at most 10,000 messages (tool calls included), so a four-stage run
+  can fill it: see PLAN.md §13. A "looks good, continue" counts as steering, and dispatching a stage twice counts as a rerun.
 
 The dispatch is `dispatch-pocketful.md`, addressed to `@coordinator`.
 
 ## Getting it onto GitHub (after the run)
 
-1. Download the room from the Band console (**Download → Download full session**). Save it
-   unchanged as `result/room.json`, and read it for secrets.
+1. Download the room from the Band console (**Download → Download full session**). First
+   scroll the room to its very first message: the download only holds what the page has
+   loaded (otherwise the last 2,500 messages). Save it as `result/room.json` and read it for
+   secrets. Bearer tokens from the seats' calls to the service under test get flagged by
+   `harness check`; replace them with `[REDACTED]`.
+   - If a room hit Band's 10,000-message limit and you continued in a second room, download
+     that one too (for example `room-2.json`) and explain it in FACTORY.md. See PLAN.md §13.
 2. Write `README.md` and `FACTORY.md` yourself; everything under `stage-N/` must come from the band.
 3. Run the offline check:
    ```sh

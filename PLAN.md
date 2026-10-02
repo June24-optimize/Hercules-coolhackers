@@ -377,3 +377,41 @@ Fixes, from stage 2 on:
   move it is and whether that seat was actually sent the request; if not, send it.
 - **shared rule**: hand work directly to the seat that acts next (merge and verify requests go
   to `@reviewer`); telling another seat you "sent" something is not sending it.
+
+## 13. Judged run, stage 4: the room message limit, and other lessons
+
+**Result.** All four stages verified (`claimed stage: 4`, isolated mode, fresh clone). That took
+about 25.5 hours end to end, from the stage-1 dispatch at 16:16 CEST on 30 Sep to the stage-4
+report at 17:45 on 1 Oct, including the waits on usage limits. 132 commits, all by seats.
+Featherless cost about $10.50 (dashboard: $13.82 for 29 Sep–1 Oct, including the last practice
+run). The Claude seats used about 358.6M tokens, on the subscription.
+
+**The room hit Band's 10,000-message limit at 14:01 CEST, mid stage 4.**
+- The limit counts tool calls, tool results and thoughts, not just chat. Four stages filled it.
+- After that, every send got `HTTP 403 limit_reached`. The seats kept working locally, but no
+  handoff or tick was delivered. The ticker log was the first place it showed.
+- There was no upgrade on our plan, and deleting messages destroys the room log. So we opened
+  a continuation room with the same five seats and sent one recovery message to `@coordinator`.
+  It named the outage and the last delivered state (branch tips, pending merges), followed by
+  the original dispatch. The coordinator rebuilt its state from git and finished the stage
+  unattended.
+- **Next time: one room per stage.** At a ~2,500–3,000 messages per stage pace, a single room
+  can't hold a four-stage run. A fresh room per stage costs nothing: the seats rebuild their
+  context from the repo anyway (the carry-forward step).
+
+**A stopped timekeeper.** After a usage-limit pause, the timekeeper's worker showed
+`Stopped running=false`, and every tick failed with "peer timekeeper has no running worker".
+`band restart` needs a running worker, and `band agent create` refuses an existing identity.
+The fix is `band attach --as <owner>/timekeeper --host generic`, which reattaches a worker to
+the existing peer. `tools/start-stage.sh` now prints this hint.
+
+**The room download.** The Band console's "Download full session" saved only the 2,500
+messages loaded on the page. Scroll the console to the room's first message, then download.
+Check the count with `python3 -c "import json;print(len(json.load(open('room.json'))['messages']))"`.
+The download contains the HTTP calls seats made to the service under test, including its
+session bearer tokens. `harness check` flags them, so replace them with `[REDACTED]`.
+
+**Cost measurement.** OpenCode logs per-turn tokens but records cost as 0. Our first estimate
+priced all input at the $0.15/M list price and came out about four times too high: Featherless
+billed nearly all input at the cached rate. Use the Featherless dashboard for the bill; the
+token log is only good for splitting it by stage.

@@ -28,6 +28,8 @@ Workspace root: /Users/wanyubian/hackathon
 Specification package (read only): /Users/wanyubian/hackathon/dark-factory-wearedevs
 Track: pocketful
 Result repository (absolute path, initialised, branch main): RESULT
+Seat working folder (absolute path; every worktree, check output and note goes here, never
+inside the result repository): WORKDIR
 Release tooling: none (no staging, promotion or watch loop in this run)
 
 Stage specifications (read each in full; paste it in full into every handoff):
